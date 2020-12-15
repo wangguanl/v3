@@ -1,0 +1,83 @@
+@import './reset.css';
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+#app {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+/*单行省略*/
+.text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*多行省略*/
+.moreline-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/*清除浮动*/
+._clearfix:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+._pointer {
+    cursor: pointer;
+}
+
+._pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+
+._flex {
+    display: flex;
+
+    @at-root ._flex-center {
+        justify-content: center;
+        align-items: center;
+    }
+
+    @at-root ._flex-items-center {
+        align-items: center;
+    }
+
+    @at-root ._flex-justify-center {
+        justify-content: center;
+    }
+
+    @at-root ._flex-justify-around {
+        justify-content: space-around;
+    }
+
+    @at-root ._flex-justify-between {
+        justify-content: space-between;
+    }
+
+
+    @at-root ._flex-column {
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    @at-root ._flex-wrap {
+        flex-wrap: wrap;
+    }
+
+}

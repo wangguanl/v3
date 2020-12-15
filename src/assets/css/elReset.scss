@@ -1,0 +1,68 @@
+/*
+	dialog弹窗
+*/
+.el-dialog__wrapper {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+
+    .el-dialog {
+        border-radius: 0;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        margin: 0 auto;
+        background-color: transparent;
+        box-shadow: none;
+
+        .el-dialog__header {
+            flex-shrink: 0;
+            height: 60px;
+            line-height: 60px;
+            background-color: #4399f3;
+            background-color: rgb(48, 65, 86);
+            padding: 0;
+            padding-left: 30px;
+            box-sizing: border-box;
+            position: relative;
+
+            .el-dialog__title {
+                color: #fff;
+            }
+
+            .el-dialog__headerbtn {
+                top: 0;
+                bottom: 0;
+            }
+
+            .el-dialog__close {
+                color: #fff;
+            }
+        }
+
+        .el-dialog__body {
+            flex: 1;
+            overflow: auto;
+            padding: 20px 20px;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .el-dialog__footer {
+            flex-shrink: 0;
+            background-color: #fff;
+        }
+    }
+}
+
+.el-image-viewer__wrapper {
+    z-index: 3002 !important;
+
+    .el-icon-circle-close {
+        color: #fff;
+    }
+}
