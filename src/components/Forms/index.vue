@@ -1,17 +1,15 @@
 <script>
 import axios from "@/basics/request.js";
-import {
-  defineComponent,
-  resolveComponent,
-  shallowReactive,
-  shallowRef,
-  h,
-} from "vue";
-import Vnodes from "../config";
+import { defineComponent, resolveComponent, shallowRef, h } from "vue";
 export default defineComponent({
-  setup() {
+  inheritAttrs: false,
+  props: {
+    modelValue: { type: Object, default: () => ({}) },
+    options: { type: Object, default: () => [] },
+  },
+  emits: ["update:modelValue"],
+  setup({ options, modelValue }, { emit, slots }) {
     const genarateVnodeOptions = (() => {
-      const FORM = shallowReactive({});
       const Dictionaries = shallowRef({});
       axios
         .post("/jbk/ConfDocCommon/selectList", {
@@ -27,20 +25,23 @@ export default defineComponent({
        * immediately => Boolean 是否调用查询
        */
       const onChange = (key, val, immediately) => {
-        FORM[key] = val;
+        modelValue[key] = val;
+        emit("update:modelValue", modelValue);
       };
       // 组件基本配置
       const config = {
         select: {
           /*
            * 两种类型使用
-           * options为数组时， 直接使用
-           * options为string时，意为key，使用全局字典，
+           * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典
            */
-          child: (options) => {
+          child: (selectOptions) => {
             let DictionariesOptions = [];
-            if (typeof options === "string" && Dictionaries.value[options]) {
-              DictionariesOptions = Dictionaries.value[options].map(
+            if (
+              typeof selectOptions === "string" &&
+              Dictionaries.value[selectOptions]
+            ) {
+              DictionariesOptions = Dictionaries.value[selectOptions].map(
                 ({ zidiandm, zidianz }) => ({
                   label: zidianz,
                   value: zidiandm,
@@ -74,7 +75,7 @@ export default defineComponent({
       return function (vnode) {
         return [
           {
-            modelValue: FORM[vnode.key],
+            value: modelValue[vnode.key],
             placeholder:
               "请" + (vnode.type === "input" ? "输入" : "选择") + vnode.label,
             ...config[vnode.type].attrs,
@@ -90,23 +91,21 @@ export default defineComponent({
 
     return () =>
       h(
-        <div class="search-bar">
-          {Vnodes.map((vnode) => {
+        <div className="form">
+          {options.map((vnode) => {
             return h(
               resolveComponent("a-" + vnode.type),
               ...genarateVnodeOptions(vnode)
             );
           })}
-          <a-button type="primary" onClick={onSubmit}>
-            搜索
-          </a-button>
+          {slots.default()}
         </div>
       );
   },
 });
 </script>
 <style lang="scss" scoped>
-::v-slotted(.search-bar) {
+::v-slotted(.form) {
   display: flex;
   align-items: center;
   & > * {

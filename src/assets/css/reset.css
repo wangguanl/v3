@@ -40,9 +40,9 @@ body {
 	background: #fff;
 	position: relative;
 	/*字体抗锯齿渲染*/
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
+	/* -moz-osx-font-smoothing: grayscale; */
+	/* -webkit-font-smoothing: antialiased; */
+	/* text-rendering: optimizeLegibility; */
 	/* text-rendering: geometricPrecision; */
 
 }
@@ -117,7 +117,7 @@ pre {
 	font-family: "Courier New", Courier, monospace;
 }
 
-
+/* 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
@@ -130,3 +130,4 @@ input[type="number"] {
 ::-webkit-input-placeholder {
 	color: #ccc;
 }
+ */
