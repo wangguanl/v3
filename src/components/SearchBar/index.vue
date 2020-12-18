@@ -1,57 +1,67 @@
 <script>
-import { defineComponent, h, reactive } from "vue";
+import { h } from "vue";
 import Forms from "../Forms";
 const components = {
   Forms,
 };
-export default defineComponent({
+export default {
   props: {
     modelValue: Object,
-    searchBar: {
-      type: Object,
-      default: () => ({
-        options: [],
-        buttons: [],
-      }),
+    options: {
+      type: Array,
+      default: () => [],
+    },
+    buttons: {
+      type: Array,
+      default: () => [],
     },
   },
   emits: ["search"],
-  setup({ searchBar, modelValue }, { emit }) {
-    const METHODS = {
-      onSearch() {
-        emit("search");
-      },
-    };
+  setup({ modelValue, options, buttons }, { emit }) {
     return () =>
       h(
         <div className="search-bar">
-          <Forms options={searchBar.options} vModel={modelValue}>
-            <a-button type="primary" onClick={METHODS.onSearch}>
-              搜索
-            </a-button>
+          <Forms
+            className="forms"
+            options={options}
+            vModel={modelValue}
+            API={{
+              FORM: {
+                model: modelValue,
+                layout: "inline",
+              },
+            }}
+          >
+            <a-form-item>
+              <a-button type="primary" onClick={() => emit("search")}>
+                搜索
+              </a-button>
+            </a-form-item>
           </Forms>
-          <div>
-            {searchBar.buttons.map((btn) => {
-              console.log(btn);
-              // return 123;
-              //  v-bind={btn}
-              return (
-                <a-button onClick={() => btn.handle(modelValue)}>
-                  {btn.name}
-                </a-button>
-              );
-            })}
+          <div class="buttons">
+            {buttons.map((btn) => (
+              <a-button {...btn}>{btn.name}</a-button>
+            ))}
           </div>
         </div>
       );
   },
   components,
-});
+};
 </script>
 <style lang="scss" scoped>
 ::v-slotted(.search-bar) {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  .forms {
+    flex: 1;
+  }
+  .buttons {
+    display: flex;
+    & > * {
+      margin-right: 10px;
+    }
+  }
 }
 </style>
