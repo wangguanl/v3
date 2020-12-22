@@ -28,8 +28,7 @@ export default {
     },
   },
   emits: ["selectionChange"],
-  setup({ datas, columns, API }, { emit }) {
-    console.log(columns)
+  setup({ datas, columns, API }, { emit, slots }) {
     return () =>
       h(
         <el-table
@@ -72,18 +71,6 @@ export default {
                           fit="fill"
                         />
                       );
-                    } else if (type === "buttons") {
-                      return attrs.buttons
-                        .filter(({ rule }) => (rule ? rule(row, $index) : true))
-                        .map((button) => (
-                          <el-button
-                            style="font-size: 12px"
-                            type="text"
-                            onClick={() => button.handle(row)}
-                          >
-                            {button.name}
-                          </el-button>
-                        ));
                     }
                     return row[attrs.key];
                   },
@@ -91,6 +78,7 @@ export default {
               )
             )
           }
+          {slots.default()}
         </el-table>
       );
   },

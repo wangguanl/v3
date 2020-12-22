@@ -31,6 +31,9 @@ export default {
         buttons: [
           {
             name: "编辑",
+            attrs: {
+              style: { color: "red" },
+            },
             handle: (row) => console.log(row),
           },
           {
@@ -44,7 +47,36 @@ export default {
     return () =>
       h(
         <div>
-          <Tables datas={datas} columns={[...columns, buttons]}></Tables>
+          <Tables datas={datas} columns={[...columns, buttons]}>
+            <template>
+              <el-table-column
+                label="操作2"
+                minWidth="300"
+                fixed="right"
+                align="center"
+              >
+                <template
+                  slot={{
+                    name: aaa,
+                  }}
+                >
+                  <el-button onClick={() => console.log(row)}>编辑</el-button>
+                </template>
+              </el-table-column>
+            </template>
+            <template>
+              <el-table-column
+                label="操作"
+                minWidth="300"
+                fixed="right"
+                align="center"
+              >
+                <template slot={{ row }}>
+                  <el-button onClick={() => console.log(row)}>编辑</el-button>
+                </template>
+              </el-table-column>
+            </template>
+          </Tables>
         </div>
       );
   },
