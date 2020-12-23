@@ -9,11 +9,12 @@ const app = createApp(App);
 /* 全局样式 */
 import '@/assets/css/index.scss';
 
-import ElementPlus from 'element-plus';
-import 'element-plus/lib/theme-chalk/index.css';
-// import Element3 from 'element3'
-// import 'element3/lib/theme-chalk/index.css'
-
-import Antd from 'ant-design-vue';
+/* 组件库 */
+import elementPlus from '@/basics/element-plus'
+elementPlus(app)
+// import antd from '@/basics/ant-design-vue'
+// antd(app)
+import antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
-app.use(Antd).use(ElementPlus).use(store).use(router).mount('#app')
+
+app.use(antd).use(store).use(router).mount('#app')

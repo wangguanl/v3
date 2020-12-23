@@ -95,7 +95,7 @@ export default {
 
     return () =>
       h(
-        <a-form {...FAPI["FORM"]}>
+        <a-form {...API["FORM"]}>
           {
             /*
              * type: 元素类型
@@ -107,8 +107,8 @@ export default {
               const { label, key } = attrs;
               return (
                 <a-form-item
-                  {...FAPI["ITEM"]}
-                  label={FAPI["FORM"].layout !== "inline" ? label : ""}
+                  {...API["ITEM"]}
+                  label={API["FORM"].layout !== "inline" ? label : ""}
                   {...items}
                 >
                   {h(

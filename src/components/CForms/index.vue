@@ -27,11 +27,12 @@ export default {
             },
           }}
         >
-          <a-form-item>
+          <div style="display: flex; justify-content: center;">
+            <a-button onClick={() => emit("cancle")}>取消</a-button>
             <a-button type="primary" onClick={() => emit("submit")}>
               保存
             </a-button>
-          </a-form-item>
+          </div>
         </Forms>
       );
   },

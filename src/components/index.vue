@@ -1,82 +1,134 @@
 <script>
-import FORM from "./config/form";
-import columns from "./config/table";
+import FormOptions from "./config/form";
+import columnsOptions from "./config/table";
+import { mockTableData } from "./mock";
 import { reactive, h, defineAsyncComponent } from "vue";
 export default {
   setup() {
+    // 响应式数据
     const State = reactive({
-      jrbzh: "18156",
+      LOADING: false,
+      // 表单
+      FORM: {
+        jrbzh: "18156",
+      },
+      // 表格
+      TABLES: [],
+      // 分页
+      PAGINATION: {
+        total: 0,
+        pageSize: 20,
+        currentPage: 1,
+      },
+      DIALOG: {},
     });
-    const METHODS = {
-      onSearch() {
-        console.log(State);
-      },
-      onSubmit() {
-        console.log(State);
+    // 方法
+    const Methods = {
+      fetchGetTableData() {
+        State.LOADING = true;
+        mockTableData({
+          data: {
+            currentPage: State.PAGINATION.currentPage,
+            pageSize: State.PAGINATION.pageSize,
+          },
+        })
+          .then(({ data, total }) => {
+            State.TABLES = data;
+            State.PAGINATION.total = total;
+          })
+          .finally(() => (State.LOADING = false));
       },
     };
-    const datas = [];
-    let i = 0;
-    while (i < 5) {
-      datas.push({
-        fawenzh: Math.random(),
-      });
-      i++;
-    }
-    const buttons = {
-      type: "buttons",
-      attrs: {
-        label: "操作",
-        minWidth: 200,
-        buttons: [
-          {
-            name: "编辑",
-            attrs: {
-              style: { color: "red" },
-            },
-            handle: (row) => console.log(row),
-          },
-          {
-            name: "查看",
-            handle: (row) => console.log(row),
-          },
-        ],
-      },
-    };
-    console.log(columns);
+    // 操作
+    const Handles = {};
+    Methods.fetchGetTableData();
     return () =>
       h(
-        <div>
-          <Tables datas={datas} columns={[...columns, buttons]}>
-            <template>
-              <el-table-column
-                label="操作2"
-                minWidth="300"
-                fixed="right"
-                align="center"
-              >
-                <template
-                  slot={{
-                    name: aaa,
+        <div className="Wrap">
+          <SearchBar
+            className="search-bar"
+            vModel={State.FORM}
+            options={FormOptions}
+            onSearch={() => {
+              State.PAGINATION.currentPage = 1;
+              Methods.fetchGetTableData();
+            }}
+            buttons={[
+              {
+                name: "新增",
+                type: "primary",
+                onClick: () => (State.DIALOG.visible = true),
+              },
+              {
+                name: "批量删除",
+                type: "danger",
+                onClick: () => console.log("批量删除", State.FORM),
+              },
+            ]}
+          />
+          <Tables
+            className="table"
+            v-loading={State.LOADING}
+            datas={State.TABLES}
+            columns={columnsOptions}
+            API={{ TABLE: { type: "index" } }}
+            v-slots={{
+              buttons: () => (
+                <el-table-column
+                  label="操作"
+                  minWidth="200"
+                  fixed="right"
+                  align="center"
+                  v-slots={{
+                    default: ({ row }) => (
+                      <div>
+                        <el-button onClick={() => console.log(row)}>
+                          编辑
+                        </el-button>
+                        <el-button onClick={() => console.log(row)}>
+                          查看详情
+                        </el-button>
+                      </div>
+                    ),
                   }}
-                >
-                  <el-button onClick={() => console.log(row)}>编辑</el-button>
-                </template>
-              </el-table-column>
-            </template>
-            <template>
-              <el-table-column
-                label="操作"
-                minWidth="300"
-                fixed="right"
-                align="center"
-              >
-                <template slot={{ row }}>
-                  <el-button onClick={() => console.log(row)}>编辑</el-button>
-                </template>
-              </el-table-column>
-            </template>
-          </Tables>
+                />
+              ),
+            }}
+          />
+          <el-pagination
+            className="pagination"
+            layout="total, sizes, prev, pager, next, jumper"
+            page-sizes={[20, 40, 80, 100, 200]}
+            page-size={State.PAGINATION.pageSize}
+            current-page={State.PAGINATION.currentPage}
+            total={State.PAGINATION.total}
+            onSizeChange={(pageSize) => {
+              State.PAGINATION.pageSize = pageSize;
+              State.PAGINATION.currentPage = 1;
+              Methods.fetchGetTableData();
+            }}
+            onCurrentChange={(currentPage) => {
+              State.PAGINATION.currentPage = currentPage;
+              Methods.fetchGetTableData();
+            }}
+          />
+          <el-dialog
+            title="提示"
+            v-model={State.DIALOG.visible}
+            width={State.DIALOG.width}
+            v-slots={{
+              default: () => (
+                <CForms
+                  vModel={State.FORM}
+                  options={FormOptions}
+                  onCancle={() => (State.DIALOG.visible = false)}
+                  onSubmit={() => (
+                    (State.DIALOG.visible = false), console.log(State.FORM)
+                  )}
+                />
+              ),
+            }}
+          />
         </div>
       );
   },
@@ -86,28 +138,27 @@ export default {
     Tables: defineAsyncComponent(() => import("./Tables")),
   },
 
-  /*   <CForms
-            vModel={State}
-            options={FORM}
-            onSubmit={() => console.log(State)}
-          />  <SearchBar
-            vModel={State}
-            options={FORM}
-            buttons={[
-              {
-                name: "新增",
-                onClick: () => console.log("新增", State),
-              },
-              {
-                name: "编辑",
-                type: "primary",
-                onClick: () => console.log("编辑", State),
-              },
-            ]}
-            onSearch={METHODS.onSearch}
-          /> */
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
+::v-slotted(.Wrap) {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  & > .search-bar {
+    flex-shrink: 0;
+    padding: 10px;
+  }
+  & > .table {
+    flex: 1;
+    overflow: hidden;
+  }
+  & > .pagination {
+    flex-shrink: 0;
+    padding: 10px;
+  }
+}
 </style>

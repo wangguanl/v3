@@ -78,7 +78,8 @@ export default {
               )
             )
           }
-          {slots.default()}
+          {slots.default && slots.default()}
+          {slots.buttons && slots.buttons()}
         </el-table>
       );
   },
