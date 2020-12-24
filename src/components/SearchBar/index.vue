@@ -5,6 +5,7 @@ const components = {
   Forms,
 };
 export default {
+  inheritAttrs: false,
   props: {
     modelValue: Object,
     options: {
@@ -17,7 +18,7 @@ export default {
     },
   },
   emits: ["search"],
-  setup({ modelValue, options, buttons }, { emit }) {
+  setup({ modelValue, options, buttons }, { emit, slots }) {
     return () =>
       h(
         <div className="search-bar">
@@ -28,21 +29,17 @@ export default {
             API={{
               FORM: {
                 model: modelValue,
-                layout: "inline",
+                inline: true,
               },
             }}
           >
-            <a-form-item>
-              <a-button type="primary" onClick={() => emit("search")}>
+            <el-form-item style="margin-bottom: 10px">
+              <el-button type="primary" onClick={() => emit("search")}>
                 搜索
-              </a-button>
-            </a-form-item>
+              </el-button>
+            </el-form-item>
           </Forms>
-          <div class="buttons">
-            {buttons.map((btn) => (
-              <a-button {...btn}>{btn.name}</a-button>
-            ))}
-          </div>
+          <div class="buttons">{slots.default()}</div>
         </div>
       );
   },
@@ -59,9 +56,6 @@ export default {
   }
   .buttons {
     display: flex;
-    & > * {
-      margin-right: 10px;
-    }
   }
 }
 </style>

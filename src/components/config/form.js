@@ -1,62 +1,62 @@
 export default [{
-    type: 'input',
-    // 当前type元素的api
-    attrs: {
-      key: 'xingming',
-      label: '姓名',
-      // readonly: true
-    },
-    // item的api
-    items: {},
+  type: 'input',
+  label: '姓名',
+  key: 'xingming',
+  // 当前type元素的api
+  attrs: {
+    // readonly: true
   },
-  {
-    type: 'input',
-    attrs: {
-      label: '军人保障号',
-      key: 'junrenbzh',
-    },
+  // item的api
+  items: {
   },
-  {
-    type: 'input',
-    attrs: {
-      key: 'zhengjianbh',
-      label: '证件编号',
-      readonly: true
-    },
-  }, {
-    type: 'select',
-    attrs: {
-      label: '性别',
-      key: 'xingbie',
-      readonly: true
-    },
-    options: 'XINGBIE',
-  }, {
-    type: "select",
-    attrs: {
-      label: '专业技术等级',
-      key: "zyjsdj"
-    },
-    options: 'BUKALX',
-  }, {
-    type: "select",
-    attrs: {
-      label: '工作单位代码',
-      key: "dwdm"
-    },
-    options: 'DANWEI'
-  }, {
-    type: "select",
-    attrs: {
-      label: '军种',
-      key: "junzhong"
-    },
-    options: 'JUNZHONG',
-  }, {
-    type: 'date-picker',
-    attrs: {
-      label: '年月日',
-      key: 'ruwurq',
-    },
+},
+{
+  type: 'input',
+  label: '军人保障号',
+  key: 'junrenbzh',
+  attrs: {
   },
-]
+},
+{
+  type: 'input',
+  key: 'zhengjianbh',
+  label: '证件编号',
+  attrs: {
+    readonly: true
+  },
+}, {
+  type: 'select',
+  label: '性别',
+  key: 'xingbie',
+  options: 'XINGBIE',
+  attrs: {
+    readonly: true
+  },
+}, {
+  type: "select",
+  label: '专业技术等级',
+  key: "zyjsdj",
+  options: 'BUKALX',
+  attrs: {
+  },
+}, {
+  type: "select",
+  label: '工作单位代码',
+  key: "dwdm",
+  options: 'DANWEI',
+  attrs: {
+  },
+}, {
+  type: "select",
+  label: '军种',
+  key: "junzhong",
+  options: 'JUNZHONG',
+  attrs: {
+  },
+}, {
+  type: 'date-picker',
+  label: '年月日',
+  key: 'ruwurq',
+  attrs: {
+  },
+}]

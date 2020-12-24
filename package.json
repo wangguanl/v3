@@ -9,11 +9,10 @@
   },
   "dependencies": {
     "ant-design-vue": "^2.0.0-rc.5",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
-    "element-plus": "^1.0.1-beta.10",
-    "element3": "0.0.28",
-    "vue": "^3.0.4",
+    "element-plus": "^1.0.1-beta.14",
+    "vue": "^3.0.3",
     "vue-router": "^4.0.1",
     "vuex": "^4.0.0-0"
   },

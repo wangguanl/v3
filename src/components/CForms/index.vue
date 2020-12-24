@@ -1,10 +1,11 @@
 <script>
-import { h } from "vue";
+import { h, defineComponent, version } from "vue";
 import Forms from "../Forms";
 const components = {
   Forms,
 };
-export default {
+export default defineComponent({
+  inheritAttrs: false,
   props: {
     modelValue: Object,
     options: {
@@ -12,30 +13,30 @@ export default {
       default: () => [],
     },
   },
-  emits: ["submit"],
+  emits: ["submit", "cancle"],
   setup({ modelValue, options }, { emit }) {
     return () =>
       h(
-        <Forms
-          options={options}
-          vModel={modelValue}
-          API={{
-            FORM: {
-              model: modelValue,
-              labelCol: { span: 4 },
-              wrapperCol: { span: 14 },
-            },
-          }}
-        >
-          <div style="display: flex; justify-content: center;">
-            <a-button onClick={() => emit("cancle")}>取消</a-button>
-            <a-button type="primary" onClick={() => emit("submit")}>
+        <div style=" height: 100%; display: flex; flex-direction: column; overflow: hidden;">
+          <Forms
+            options={options}
+            vModel={modelValue}
+            API={{
+              FORM: {
+                model: modelValue,
+                style: "flex: 1; overflow: auto",
+              },
+            }}
+          ></Forms>
+          <div style="display: flex; justify-content: center; flex-shrink: 0;">
+            <el-button onClick={() => emit("cancle")}>取消</el-button>
+            <el-button type="primary" onClick={() => emit("submit")}>
               保存
-            </a-button>
+            </el-button>
           </div>
-        </Forms>
+        </div>
       );
   },
   components,
-};
+});
 </script>

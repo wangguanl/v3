@@ -31,108 +31,151 @@ export default {
      * val => 值
      * immediately => Boolean 是否调用查询
      */
-    const onChange = (key, val, immediately) => {
+    const onUpdate = (key, val, immediately) => {
       modelValue[key] = val;
       emit("update:modelValue", modelValue);
     };
 
-    // 组件基本配置
-    const config = {
-      ...(() => {
-        const defaultConfig = {};
-        options.filter(
-          ({ type }) =>
-            (defaultConfig[type] = {
-              attrs: {},
-              on: () => ({}),
-            })
+    const generateVNode = (() => {
+      // 组件基本配置
+      const config = {
+        select: ({ key, options }) => [
+          {
+            clearable: true,
+            onChange: (val) => onUpdate(key, val, true),
+          },
+          {
+            default: () => {
+              /*
+               * 两种类型使用
+               * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典
+               */
+              let DictionariesOptions = [];
+              if (typeof options === "string" && Dictionaries.value[options]) {
+                DictionariesOptions = Dictionaries.value[options].map(
+                  ({ zidiandm, zidianz }) => ({
+                    label: zidianz,
+                    value: zidiandm,
+                  })
+                );
+              }
+              return DictionariesOptions.map(({ label, value }) => (
+                <el-option value={value} label={label} key={value} />
+              ));
+            },
+          },
+        ],
+        input: ({ key }) => [
+          {
+            clearable: true,
+            onInput: (val) => onUpdate(key, val, false),
+          },
+        ],
+        "date-picker": ({ label, key, attrs }) => {
+          const type = {
+            daterange: {
+              "value-format": "yyyy-MM-dd",
+              "range-separator": "-",
+              "start-placeholder": label + "开始日期",
+              "end-placeholder": label + "结束日期",
+              shortcuts: [
+                {
+                  text: "今天",
+                  value: (() => {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 1);
+                    return [start, end];
+                  })(),
+                },
+                {
+                  text: "最近一周",
+                  value: (() => {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                    return [start, end];
+                  })(),
+                },
+                {
+                  text: "最近一个月",
+                  value: (() => {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                    return [start, end];
+                  })(),
+                },
+                {
+                  text: "最近三个月",
+                  value: (() => {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                    return [start, end];
+                  })(),
+                },
+              ],
+            },
+            month: {
+              "value-format": "yyyy-MM",
+            },
+          };
+          return [
+            {
+              clearable: true,
+              ...type[attrs["type"]],
+              onChange: (val) => onUpdate(key, val, true),
+            },
+          ];
+        },
+      };
+      return (option) => {
+        const { type, label, key, attrs } = option;
+        const [Attrs, Slots] = config[type](option);
+
+        return h(
+          resolveComponent("el-" + type),
+          {
+            modelValue: modelValue[key],
+            placeholder: "请" + (type === "input" ? "输入" : "选择") + label,
+            ...Attrs,
+            ...attrs,
+          },
+          Slots
         );
-        return defaultConfig;
-      })(),
-      select: {
-        /*
-         * 两种类型使用
-         * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典
-         */
-        child: (selectOptions) => {
-          let DictionariesOptions = [];
-          if (
-            typeof selectOptions === "string" &&
-            Dictionaries.value[selectOptions]
-          ) {
-            DictionariesOptions = Dictionaries.value[selectOptions].map(
-              ({ zidiandm, zidianz }) => ({
-                label: zidianz,
-                value: zidiandm,
-              })
-            );
-          }
-          return DictionariesOptions.map(({ label, value }) => (
-            // <el-option value={value} label={label} key={value} />
-            <a-select-option value={value} key={value}>
-              {label}
-            </a-select-option>
-          ));
-        },
-
-        attrs: {
-          allowClear: true,
-        },
-
-        on: (key) => ({
-          onChange: (val, obj) => onChange(key, val, true),
-        }),
-      },
-      input: {
-        attrs: {
-          allowClear: true,
-        },
-        on: (key) => ({
-          onChange: (dom) => onChange(key, dom.target.value, false),
-        }),
-      },
-    };
+      };
+    })();
 
     return () =>
       h(
-        <a-form {...API["FORM"]}>
+        <el-form {...API["FORM"]}>
           {
             /*
              * type: 元素类型
+             * label: form-item组件lable
+             * key: modelValue的键
              * attrs: type组件API
+             * options: <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典
              * items: form-item组件API
-             * options: 下拉框(子组件)(@FN: child)
              */
-            options.map(({ type, attrs = {}, items = {}, options }) => {
-              const { label, key } = attrs;
+            options.map((option) => {
+              const { key, label, items } = option;
               return (
-                <a-form-item
+                <el-form-item
+                  key={key}
                   {...API["ITEM"]}
-                  label={API["FORM"].layout !== "inline" ? label : ""}
+                  label={API["FORM"]["inline"] ? "" : label}
+                  style={API["FORM"]["inline"] ? "margin-bottom: 10px" : ""}
                   {...items}
                 >
-                  {h(
-                    resolveComponent("a-" + type),
-                    {
-                      value: modelValue[key],
-                      checked: modelValue[key],
-                      placeholder:
-                        "请" + (type === "input" ? "输入" : "选择") + label,
-                      ...config[type]["attrs"],
-                      ...config[type]["on"](key),
-                      ...attrs,
-                    },
-                    {
-                      default: () =>
-                        options ? config[type].child(options) : "",
-                    }
-                  )}
-                </a-form-item>
+                  {generateVNode(option)}
+                </el-form-item>
               );
             })
           }
-          {slots.default()}
-        </a-form>
+          {slots.default && slots.default()}
+        </el-form>
       );
   },
 };

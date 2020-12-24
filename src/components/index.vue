@@ -2,7 +2,17 @@
 import FormOptions from "./config/form";
 import columnsOptions from "./config/table";
 import { mockTableData } from "./mock";
-import { reactive, h, defineAsyncComponent } from "vue";
+import { reactive, h, defineAsyncComponent, ref } from "vue";
+import SearchBar from "./SearchBar";
+import CForms from "./CForms";
+import Tables from "./Tables";
+import Dialogs from "./Dialogs";
+const components = {
+  SearchBar,
+  CForms,
+  Tables,
+  Dialogs,
+};
 export default {
   setup() {
     // 响应式数据
@@ -20,7 +30,10 @@ export default {
         pageSize: 20,
         currentPage: 1,
       },
-      DIALOG: {},
+      DIALOG: {
+        visible: false,
+        width: "1000px",
+      },
     });
     // 方法
     const Methods = {
@@ -53,19 +66,25 @@ export default {
               State.PAGINATION.currentPage = 1;
               Methods.fetchGetTableData();
             }}
-            buttons={[
-              {
-                name: "新增",
-                type: "primary",
-                onClick: () => (State.DIALOG.visible = true),
-              },
-              {
-                name: "批量删除",
-                type: "danger",
-                onClick: () => console.log("批量删除", State.FORM),
-              },
-            ]}
-          />
+          >
+            <el-button
+              type="primary"
+              onClick={() => {
+                State.DIALOG.visible = true;
+                State.DIALOG.title = "新增";
+              }}
+            >
+              新增
+            </el-button>
+            <el-button
+              type="danger"
+              onClick={() => {
+                console.log("批量删除", State.FORM);
+              }}
+            >
+              批量删除
+            </el-button>
+          </SearchBar>
           <Tables
             className="table"
             v-loading={State.LOADING}
@@ -112,32 +131,22 @@ export default {
               Methods.fetchGetTableData();
             }}
           />
-          <el-dialog
-            title="提示"
-            v-model={State.DIALOG.visible}
-            width={State.DIALOG.width}
-            v-slots={{
-              default: () => (
-                <CForms
-                  vModel={State.FORM}
-                  options={FormOptions}
-                  onCancle={() => (State.DIALOG.visible = false)}
-                  onSubmit={() => (
-                    (State.DIALOG.visible = false), console.log(State.FORM)
-                  )}
-                />
-              ),
-            }}
-          />
+          <Dialogs v-model={State.DIALOG}>
+            <CForms
+              vModel={State.FORM}
+              options={FormOptions}
+              onCancle={() => {
+                State.DIALOG.visible = false;
+              }}
+              onSubmit={() => {
+                (State.DIALOG.visible = false), console.log(State.FORM);
+              }}
+            />
+          </Dialogs>
         </div>
       );
   },
-  components: {
-    SearchBar: defineAsyncComponent(() => import("./SearchBar")),
-    CForms: defineAsyncComponent(() => import("./CForms")),
-    Tables: defineAsyncComponent(() => import("./Tables")),
-  },
-
+  components,
 };
 </script>
 
@@ -151,8 +160,9 @@ export default {
   & > .search-bar {
     flex-shrink: 0;
     padding: 10px;
+    padding-bottom: 0;
   }
-  & > .table {
+  & > .el-table {
     flex: 1;
     overflow: hidden;
   }

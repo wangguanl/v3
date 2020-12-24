@@ -1,41 +1,41 @@
 export default [{
+  label: '发文字号',
+  key: 'fawenzh',
   attrs: {
-    label: '发文字号',
-    key: 'fawenzh',
     minWidth: 200,
   },
 }, {
+  label: '标准名称',
+  key: 'biaozhunmc',
   attrs: {
-    label: '标准名称',
-    key: 'biaozhunmc',
-    width: 200
+    minWidth: 200
   }
 }, {
 
+  label: '发文时间',
+  key: 'fawensj',
   attrs: {
-    label: '发文时间',
-    key: 'fawensj',
-    width: 200
+    minWidth: 200
   }
 }, {
 
+  label: '文本名',
+  key: 'wenbenmc',
   attrs: {
-    label: '文本名',
-    key: 'wenbenmc',
-    width: 200
+    minWidth: 200
   }
 }, {
 
+  label: '发文单位',
+  key: 'fawendw',
   attrs: {
-    label: '发文单位',
-    key: 'fawendw',
-    width: 200
+    minWidth: 200
   }
 }, {
 
+  label: '应用范围',
+  key: 'yingyongfw',
   attrs: {
-    label: '应用范围',
-    key: 'yingyongfw',
-    width: 200
+    minWidth: 200
   }
 }]

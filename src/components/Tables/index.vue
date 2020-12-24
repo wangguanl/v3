@@ -1,6 +1,7 @@
 <script>
 import { resolveComponent, h } from "vue";
 export default {
+  inheritAttrs: false,
   props: {
     // 数据
     datas: {
@@ -51,14 +52,17 @@ export default {
           {
             /*
              * type: img | text
+             * key: 键 => prop
+             * label: table-column组件label
              * attrs: table-column组件API
              */
-            columns.map(({ type, attrs }) =>
+            columns.map(({ key, label, type, attrs }) =>
               h(
                 resolveComponent("el-table-column"),
                 {
                   "show-overflow-tooltip": true,
                   ...API["COLUMN"],
+                  label,
                   ...attrs,
                 },
                 {
@@ -67,12 +71,12 @@ export default {
                       return (
                         <el-image
                           style="width: 100px; height: 100px"
-                          src={row[attrs.key]}
+                          src={row[key]}
                           fit="fill"
                         />
                       );
                     }
-                    return row[attrs.key];
+                    return row[key];
                   },
                 }
               )
