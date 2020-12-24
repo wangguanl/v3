@@ -2,18 +2,18 @@ export default [{
   type: 'input',
   label: '姓名',
   key: 'xingming',
-  // 当前type元素的api
   attrs: {
+    required: true,
+    rules: [],
     // readonly: true
   },
-  // item的api
   items: {
   },
 },
 {
   type: 'input',
   label: '军人保障号',
-  key: 'junrenbzh',
+  key: 'jrbzh',
   attrs: {
   },
 },
@@ -22,7 +22,7 @@ export default [{
   key: 'zhengjianbh',
   label: '证件编号',
   attrs: {
-    readonly: true
+    // readonly: true
   },
 }, {
   type: 'select',
@@ -30,7 +30,7 @@ export default [{
   key: 'xingbie',
   options: 'XINGBIE',
   attrs: {
-    readonly: true
+    // readonly: true
   },
 }, {
   type: "select",

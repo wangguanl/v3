@@ -135,6 +135,15 @@ export default {
             <CForms
               vModel={State.FORM}
               options={FormOptions}
+              API={{
+                required: true,
+                FORM: {
+                  rules: {},
+                },
+                ITEM: {
+                  "lable-width": "100px",
+                },
+              }}
               onCancle={() => {
                 State.DIALOG.visible = false;
               }}

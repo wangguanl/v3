@@ -5,13 +5,31 @@ export default {
   inheritAttrs: false,
   props: {
     modelValue: { type: Object, default: () => ({}) }, // 双向数据绑定
-    options: { type: Object, default: () => [] }, // 渲染元素
-    /*  表单参数 */
+    /* 
+      * 渲染格式（数据模型）
+      * {
+         * type: 'input', //  <String> el-[type] 元素类型
+         * label: '姓名', //  <String> 表单label
+         * key: 'xingming',  // <String> 表单key
+         * options: '', // <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
+         * 
+         * 参考组件库的api
+         * attrs: {}, // <Object> el-[type]元素的attrs
+         * items: {}, // <Object> el-form-item的attrs
+        }
+     */
+    options: { type: Object, default: () => [] },
+
+    /*
+     * 参考组件库的api
+     * FORM: {}, // <Object> el-form组件attrs
+     * ITEM: {}, // <Object> el-form-item的attrs
+     */
     API: {
       type: Object,
       default: () => ({
-        FORM: {}, // 传参为form组件API
-        ITEM: {}, // 传参为form-item组件API
+        FORM: {},
+        ITEM: {},
       }),
     },
   },
@@ -35,6 +53,7 @@ export default {
       modelValue[key] = val;
       emit("update:modelValue", modelValue);
     };
+    const onClear = (key) => onUpdate(key, "", true);
 
     const generateVNode = (() => {
       // 组件基本配置
@@ -43,12 +62,13 @@ export default {
           {
             clearable: true,
             onChange: (val) => onUpdate(key, val, true),
+            onClear: () => onClear(key),
           },
           {
             default: () => {
               /*
                * 两种类型使用
-               * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典
+               * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
                */
               let DictionariesOptions = [];
               if (typeof options === "string" && Dictionaries.value[options]) {
@@ -69,6 +89,7 @@ export default {
           {
             clearable: true,
             onInput: (val) => onUpdate(key, val, false),
+            onClear: () => onClear(key),
           },
         ],
         "date-picker": ({ label, key, attrs }) => {
@@ -126,6 +147,7 @@ export default {
               clearable: true,
               ...type[attrs["type"]],
               onChange: (val) => onUpdate(key, val, true),
+              onClear: () => onClear(key),
             },
           ];
         },
@@ -164,6 +186,7 @@ export default {
               return (
                 <el-form-item
                   key={key}
+                  prop={key}
                   {...API["ITEM"]}
                   label={API["FORM"]["inline"] ? "" : label}
                   style={API["FORM"]["inline"] ? "margin-bottom: 10px" : ""}
