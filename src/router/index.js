@@ -11,10 +11,7 @@ const router = createRouter({
   }, {
     path: '/SearchBar',
     component: () => import('@/components/index.vue')
-  }, {
-    path: '/AntdForm',
-    component: () => import('@/views/Forms/AntdForm')
-  }],
+  },],
 })
 
 export default router

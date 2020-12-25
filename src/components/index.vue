@@ -1,8 +1,12 @@
 <script>
+/* 配置项 */
 import FormOptions from "./config/form";
 import columnsOptions from "./config/table";
+
+/* 模拟数据 */
 import { mockTableData } from "./mock";
-import { reactive, h, defineAsyncComponent, ref } from "vue";
+
+/* 组件 */
 import SearchBar from "./SearchBar";
 import CForms from "./CForms";
 import Tables from "./Tables";
@@ -13,6 +17,7 @@ const components = {
   Tables,
   Dialogs,
 };
+import { reactive, h } from "vue";
 export default {
   setup() {
     // 响应式数据
@@ -90,7 +95,12 @@ export default {
             v-loading={State.LOADING}
             datas={State.TABLES}
             columns={columnsOptions}
-            API={{ TABLE: { type: "index" } }}
+            onSelectionChange={(rows) => console.log(rows)}
+            API={{
+              TABLE: {
+                // type: "index"
+              },
+            }}
             v-slots={{
               buttons: () => (
                 <el-table-column

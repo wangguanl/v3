@@ -1,5 +1,5 @@
 import {
-    ElAlert,
+    /* ElAlert,
     ElAside,
     ElAutocomplete,
     ElAvatar,
@@ -81,11 +81,36 @@ import {
     ElLoading,
     ElMessage,
     ElMessageBox,
-    ElNotification,
+    ElNotification, */
+
+    ElButton,
+    ElForm,
+    ElFormItem,
+    ElPagination,
+    ElInput,
+    ElTable,
+    ElTableColumn,
+    ElSelect,
+    ElOption,
+    ElDatePicker,
+    ElLoading,
+    ElDialog,
 } from 'element-plus';
 
 const components = [
-    ElAlert,
+    ElButton,
+    ElForm,
+    ElFormItem,
+    ElPagination,
+    ElInput,
+    ElTable,
+    ElTableColumn,
+    ElSelect,
+    ElOption,
+    ElDatePicker,
+    ElLoading,
+    ElDialog,
+    /* ElAlert,
     ElAside,
     ElAutocomplete,
     ElAvatar,
@@ -162,15 +187,16 @@ const components = [
     ElTooltip,
     ElTransfer,
     ElTree,
-    ElUpload,
+    ElUpload, */
 ]
 
 const plugins = [
-    ElInfiniteScroll,
+    /* ElInfiniteScroll,
     ElLoading,
     ElMessage,
     ElMessageBox,
-    ElNotification,
+    ElNotification, */
+    ElLoading,
 ]
 export default function (app) {
     components.forEach(component => app.component(component.name, component))

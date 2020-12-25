@@ -13,11 +13,6 @@ export default {
       type: Array,
       default: () => [],
     },
-    // 表格按钮
-    buttons: {
-      type: Array,
-      default: () => [],
-    },
     API: {
       type: Object,
       default: () => ({
@@ -28,7 +23,8 @@ export default {
       }),
     },
   },
-  emits: ["selectionChange"],
+  emits: ["selection-change"],
+  // highlight-current-row
   setup({ datas, columns, API }, { emit, slots }) {
     return () =>
       h(
@@ -38,8 +34,7 @@ export default {
           height="100%"
           stripe
           border
-          highlight-current-row
-          onSelectionChange={() => emit("selectionChange")}
+          onSelectionChange={() => emit("selection-change", [])}
           {...API["TABLE"]}
         >
           <el-table-column
