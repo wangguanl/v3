@@ -1,6 +1,6 @@
 <script>
 import { h } from "vue";
-import Forms from "../Forms";
+import Forms from "@/components/Forms";
 const components = {
   Forms,
 };
@@ -56,15 +56,15 @@ export default {
       });
       // 全局必填项，设置每一个值都是必填项
       if (required) {
-        arr.forEach(({ type, label, key, attrs }) => {
-          const { rules } = attrs;
+        arr.forEach(({ type, label, key, attrs = {} }) => {
+          const { rules = [] } = attrs;
           rule[key].unshift(useRequiredRule(type, label));
           rule[key].concat(rules);
         });
       } else {
         // 统一集成 el-form-item 组件的 rules 与 required 的校验规则对象
-        arr.forEach(({ type, label, key, attrs }) => {
-          const { required, rules } = attrs;
+        arr.forEach(({ type, label, key, attrs = {} }) => {
+          const { required, rules = [] } = attrs;
           rule[key].concat(rules);
           required && rule[key].unshift(useRequiredRule(type, label));
         });
@@ -73,7 +73,7 @@ export default {
     })();
     return () =>
       h(
-        <div style=" height: 100%; display: flex; flex-direction: column; overflow: hidden;">
+        <div style="height: 100%; display: flex; flex-direction: column; overflow: hidden;">
           <Forms
             options={options}
             vModel={modelValue}
@@ -81,12 +81,12 @@ export default {
               FORM: {
                 style: "flex: 1; overflow: auto; ",
                 "label-position": "right",
+                "label-width": "120px",
                 model: modelValue,
                 ...FORM,
                 rules,
               },
               ITEM: {
-                "label-width": "120px",
                 ...ITEM,
               },
             }}

@@ -5,8 +5,9 @@ export const mockTableData = ({ data }) => {
         const m = currentPage + '-' + Math.random();
         for (let i = 0; i < pageSize; i++) {
             DATA.push({
-                fawenzh: m,
-                biaozhunmc: m,
+                xingming: m,
+                jrbzh: m,
+                zhengjianbh: m,
                 fawensj: m,
                 wenbenmc: m,
                 fawendw: m,
@@ -15,6 +16,6 @@ export const mockTableData = ({ data }) => {
         }
         setTimeout(() => {
             resolve({ data: DATA, total: 1000 });
-        }, 1000);
+        }, 2000);
     });
 };

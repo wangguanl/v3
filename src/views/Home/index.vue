@@ -1,34 +1,31 @@
 <script>
 /* 配置项 */
-import FormOptions from "./config/form";
-import columnsOptions from "./config/table";
+import { formOptions, searchOptions, columnsOptions } from "./config";
 
 /* 模拟数据 */
 import { mockTableData } from "./mock";
 
 /* 组件 */
-import SearchBar from "./SearchBar";
-import CForms from "./CForms";
-import Tables from "./Tables";
-import Dialogs from "./Dialogs";
+import Tables from "@/components/Tables";
+import Forms from "@/components/Forms";
+import Dialogs from "@/views/components/Dialogs";
+import CForms from "@/views/components/CForms";
 const components = {
-  SearchBar,
-  CForms,
   Tables,
   Dialogs,
+  CForms,
 };
+
 import { reactive, h } from "vue";
 export default {
   setup() {
     // 响应式数据
     const State = reactive({
       LOADING: false,
-      // 表单
-      FORM: {
-        jrbzh: "18156",
-      },
-      // 表格
-      TABLES: [],
+
+      SEARCHBAR: {}, // 搜索条件
+
+      TABLE: { data: [] }, // 表格数据
       // 分页
       PAGINATION: {
         total: 0,
@@ -37,9 +34,16 @@ export default {
       },
       DIALOG: {
         visible: false,
+        title: "",
         width: "1000px",
+        top: 0,
       },
+
+      FORM: {},
     });
+    // 操作事件函数
+    const Handles = {};
+
     // 方法
     const Methods = {
       fetchGetTableData() {
@@ -51,58 +55,73 @@ export default {
           },
         })
           .then(({ data, total }) => {
-            State.TABLES = data;
+            State.TABLE.data = data;
+            console.log(State.TABLE);
             State.PAGINATION.total = total;
           })
           .finally(() => (State.LOADING = false));
       },
     };
-    // 操作
-    const Handles = {};
+
     Methods.fetchGetTableData();
+
     return () =>
       h(
         <div className="Wrap">
-          <SearchBar
-            className="search-bar"
-            vModel={State.FORM}
-            options={FormOptions}
-            onSearch={() => {
-              State.PAGINATION.currentPage = 1;
-              Methods.fetchGetTableData();
+          <Forms
+            options={searchOptions}
+            vModel={State.SEARCHBAR}
+            API={{
+              FORM: {
+                inline: true,
+              },
             }}
-          >
-            <el-button
-              type="primary"
-              onClick={() => {
-                State.DIALOG.visible = true;
-                State.DIALOG.title = "新增";
-              }}
-            >
-              新增
-            </el-button>
-            <el-button
-              type="danger"
-              onClick={() => {
-                console.log("批量删除", State.FORM);
-              }}
-            >
-              批量删除
-            </el-button>
-          </SearchBar>
+            v-slots={{
+              default: () => (
+                <el-form-item>
+                  <el-button
+                    type="primary"
+                    onClick={() => {
+                      State.PAGINATION.currentPage = 1;
+                      Methods.fetchGetTableData();
+                    }}
+                  >
+                    搜索
+                  </el-button>
+                  <el-button
+                    type="primary"
+                    onClick={() => {
+                      State.DIALOG.visible = true;
+                      State.DIALOG.title = "新增";
+                    }}
+                  >
+                    新增
+                  </el-button>
+                  <el-button
+                    type="danger"
+                    onClick={() => {
+                      console.log("批量删除");
+                    }}
+                  >
+                    批量删除
+                  </el-button>
+                </el-form-item>
+              ),
+            }}
+          />
           <Tables
             className="table"
             v-loading={State.LOADING}
-            datas={State.TABLES}
+            datas={State.TABLE}
             columns={columnsOptions}
             onSelectionChange={(rows) => console.log(rows)}
             API={{
               TABLE: {
-                // type: "index"
+                type: "selection",
               },
             }}
             v-slots={{
-              buttons: () => (
+              default: (
                 <el-table-column
                   label="操作"
                   minWidth="200"
@@ -111,7 +130,12 @@ export default {
                   v-slots={{
                     default: ({ row }) => (
                       <div>
-                        <el-button onClick={() => console.log(row)}>
+                        <el-button
+                          onClick={() => {
+                            State.DIALOG.visible = true;
+                            State.FORM = { ...row };
+                          }}
+                        >
                           编辑
                         </el-button>
                         <el-button onClick={() => console.log(row)}>
@@ -141,27 +165,31 @@ export default {
               Methods.fetchGetTableData();
             }}
           />
-          <Dialogs v-model={State.DIALOG}>
-            <CForms
-              vModel={State.FORM}
-              options={FormOptions}
-              API={{
-                required: true,
-                FORM: {
-                  rules: {},
-                },
-                ITEM: {
-                  "lable-width": "100px",
-                },
-              }}
-              onCancle={() => {
-                State.DIALOG.visible = false;
-              }}
-              onSubmit={() => {
-                (State.DIALOG.visible = false), console.log(State.FORM);
-              }}
-            />
-          </Dialogs>
+          <Dialogs
+            v-model={State.DIALOG}
+            v-slots={{
+              default: () => (
+                <CForms
+                  vModel={State.FORM}
+                  options={formOptions}
+                  API={{
+                    required: true,
+                    FORM: {
+                      rules: {},
+                      // "label-width": "200px",
+                    },
+                    ITEM: {},
+                  }}
+                  onCancle={() => {
+                    State.DIALOG.visible = false;
+                  }}
+                  onSubmit={() => {
+                    (State.DIALOG.visible = false), console.log(State.FORM);
+                  }}
+                />
+              ),
+            }}
+          />
         </div>
       );
   },
@@ -176,7 +204,7 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  & > .search-bar {
+  & > .el-form {
     flex-shrink: 0;
     padding: 10px;
     padding-bottom: 0;

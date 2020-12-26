@@ -8,8 +8,9 @@ export default {
       type: Object,
       default: () => ({
         visible: false,
-        width: "1000px",
+        width: "",
         title: "",
+        top: 0,
       }),
     },
   },
@@ -20,13 +21,7 @@ export default {
     });
     return () =>
       h(
-        <el-dialog
-          v-model={modelValue.visible}
-          ref={dialogRef}
-          width={modelValue.width}
-          title={modelValue.title}
-          top="0"
-        >
+        <el-dialog ref={dialogRef} v-model={modelValue.visible} {...modelValue}>
           {slots.default()}
         </el-dialog>
       );

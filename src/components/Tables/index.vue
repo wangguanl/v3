@@ -24,17 +24,17 @@ export default {
     },
   },
   emits: ["selection-change"],
-  // highlight-current-row
   setup({ datas, columns, API }, { emit, slots }) {
     return () =>
       h(
         <el-table
-          data={datas}
+          data={datas.data}
           style="width: 100%"
           height="100%"
+          highlight-current-row
           stripe
           border
-          onSelectionChange={() => emit("selection-change", [])}
+          onSelectionChange={(selection) => emit("selection-change", selection)}
           {...API["TABLE"]}
         >
           <el-table-column
@@ -55,7 +55,7 @@ export default {
               h(
                 resolveComponent("el-table-column"),
                 {
-                  "show-overflow-tooltip": true,
+                  // "show-overflow-tooltip": true,
                   ...API["COLUMN"],
                   label,
                   ...attrs,
@@ -78,7 +78,6 @@ export default {
             )
           }
           {slots.default && slots.default()}
-          {slots.buttons && slots.buttons()}
         </el-table>
       );
   },

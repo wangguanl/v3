@@ -92,23 +92,23 @@ export default {
             onClear: () => onClear(key),
           },
         ],
-        "date-picker": ({ label, key, attrs }) => {
-          const type = {
+        "date-picker": ({ label, key, attrs = {} }) => {
+          const Types = {
+            date: {
+              "value-format": "yyyy-MM-dd",
+              shortcuts: [
+                {
+                  text: "今天",
+                  value: new Date(),
+                },
+              ],
+            },
             daterange: {
               "value-format": "yyyy-MM-dd",
               "range-separator": "-",
               "start-placeholder": label + "开始日期",
               "end-placeholder": label + "结束日期",
               shortcuts: [
-                {
-                  text: "今天",
-                  value: (() => {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 1);
-                    return [start, end];
-                  })(),
-                },
                 {
                   text: "最近一周",
                   value: (() => {
@@ -145,7 +145,7 @@ export default {
           return [
             {
               clearable: true,
-              ...type[attrs["type"]],
+              ...Types[attrs["type"] || "date"],
               onChange: (val) => onUpdate(key, val, true),
               onClear: () => onClear(key),
             },

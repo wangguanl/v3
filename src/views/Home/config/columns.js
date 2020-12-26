@@ -1,12 +1,12 @@
 export default [{
-  label: '发文字号',
-  key: 'fawenzh',
+  label: '姓名',
+  key: 'xingming',
   attrs: {
     minWidth: 200,
   },
 }, {
-  label: '标准名称',
-  key: 'biaozhunmc',
+  label: '保障号',
+  key: 'jrbzh',
   attrs: {
     minWidth: 200
   }

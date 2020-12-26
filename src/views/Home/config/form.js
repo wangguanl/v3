@@ -5,14 +5,13 @@ export default [{
   attrs: {
     required: true,
     rules: [],
-    // readonly: true
   },
   items: {
   },
 },
 {
   type: 'input',
-  label: '军人保障号',
+  label: '保障号',
   key: 'jrbzh',
   attrs: {
   },
@@ -22,7 +21,6 @@ export default [{
   key: 'zhengjianbh',
   label: '证件编号',
   attrs: {
-    // readonly: true
   },
 }, {
   type: 'select',
@@ -30,7 +28,6 @@ export default [{
   key: 'xingbie',
   options: 'XINGBIE',
   attrs: {
-    // readonly: true
   },
 }, {
   type: "select",
@@ -57,6 +54,18 @@ export default [{
   type: 'date-picker',
   label: '年月日',
   key: 'ruwurq',
+}, {
+  type: 'date-picker',
+  label: '区间',
+  key: 'ruwurq2',
   attrs: {
+    type: 'daterange'
+  },
+}, {
+  type: 'date-picker',
+  label: '月',
+  key: 'ruwurq3',
+  attrs: {
+    type: 'month'
   },
 }]
