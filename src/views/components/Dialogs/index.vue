@@ -14,15 +14,19 @@ export default {
       }),
     },
   },
-  setup({ modelValue }, { slots }) {
+  setup(props, { slots }) {
     const dialogRef = ref(null);
     onMounted(() => {
       drag(dialogRef.value.dialogRef);
     });
     return () =>
       h(
-        <el-dialog ref={dialogRef} v-model={modelValue.visible} {...modelValue}>
-          {slots.default()}
+        <el-dialog
+          ref={dialogRef}
+          v-model={props["modelValue"].visible}
+          {...props["modelValue"]}
+        >
+          {slots.default && slots.default()}
         </el-dialog>
       );
   },

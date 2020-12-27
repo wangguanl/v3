@@ -13,32 +13,25 @@ export default {
       type: Array,
       default: () => [],
     },
-    API: {
-      type: Object,
-      default: () => ({
-        TABLE: {
-          type: "selection",
-        },
-        COLUMN: {},
-      }),
-    },
+    // 参考 el-table-column 组件API
+    "el-table-column": Object,
   },
   emits: ["selection-change"],
-  setup({ datas, columns, API }, { emit, slots }) {
+  setup(props, { emit, slots, attrs }) {
     return () =>
       h(
         <el-table
-          data={datas.data}
+          data={props["datas"]}
           style="width: 100%"
           height="100%"
           highlight-current-row
           stripe
           border
           onSelectionChange={(selection) => emit("selection-change", selection)}
-          {...API["TABLE"]}
+          {...attrs}
         >
           <el-table-column
-            type={API["TABLE"]["type"]}
+            type={attrs["type"]}
             label="排序"
             width="50"
             fixed="left"
@@ -49,16 +42,16 @@ export default {
              * type: img | text
              * key: 键 => prop
              * label: table-column组件label
-             * attrs: table-column组件API
+             * attr: table-column组件API
              */
-            columns.map(({ key, label, type, attrs }) =>
+            props["columns"].map(({ key, label, type, attr }) =>
               h(
                 resolveComponent("el-table-column"),
                 {
                   // "show-overflow-tooltip": true,
-                  ...API["COLUMN"],
+                  ...props["el-table-column"],
                   label,
-                  ...attrs,
+                  ...attr,
                 },
                 {
                   default: ({ row }) => {

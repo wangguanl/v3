@@ -2,53 +2,51 @@ export default [{
   type: 'input',
   label: '姓名',
   key: 'xingming',
-  attrs: {
-    required: true,
-    rules: [],
+  attr: {
   },
-  items: {
+  item: {
   },
 },
 {
   type: 'input',
   label: '保障号',
   key: 'jrbzh',
-  attrs: {
+  attr: {
   },
 },
 {
   type: 'input',
   key: 'zhengjianbh',
   label: '证件编号',
-  attrs: {
+  attr: {
   },
 }, {
   type: 'select',
   label: '性别',
   key: 'xingbie',
-  options: 'XINGBIE',
-  attrs: {
+  selectOptions: 'XINGBIE',
+  attr: {
   },
 }, {
   type: "select",
   label: '专业技术等级',
   key: "zyjsdj",
-  options: 'BUKALX',
-  attrs: {
+  selectOptions: 'BUKALX',
+  attr: {
   },
 }, {
   type: "select",
   label: '工作单位代码',
   key: "dwdm",
-  options: 'DANWEI',
-  attrs: {
+  selectOptions: 'DANWEI',
+  attr: {
   },
 }, {
   type: "select",
   label: '军种',
   key: "junzhong",
-  options: 'JUNZHONG',
-  attrs: {
+  selectOptions: 'JUNZHONG',
+  attr: {
   },
 }, {
   type: 'date-picker',
@@ -58,14 +56,14 @@ export default [{
   type: 'date-picker',
   label: '区间',
   key: 'ruwurq2',
-  attrs: {
+  attr: {
     type: 'daterange'
   },
 }, {
   type: 'date-picker',
   label: '月',
   key: 'ruwurq3',
-  attrs: {
+  attr: {
     type: 'month'
   },
 }]

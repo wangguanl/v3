@@ -5,36 +5,26 @@ export default {
   inheritAttrs: false,
   props: {
     modelValue: { type: Object, default: () => ({}) }, // 双向数据绑定
+
     /* 
       * 渲染格式（数据模型）
       * {
          * type: 'input', //  <String> el-[type] 元素类型
          * label: '姓名', //  <String> 表单label
          * key: 'xingming',  // <String> 表单key
-         * options: '', // <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
-         * 
+         * selectOptions: '', // <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
          * 参考组件库的api
-         * attrs: {}, // <Object> el-[type]元素的attrs
-         * items: {}, // <Object> el-form-item的attrs
+         * attr: {}, // <Object> el-[type]元素的attrs
+         * item: {}, // <Object> el-form-item的attrs
         }
      */
-    options: { type: Object, default: () => [] },
+    options: { type: Array, default: () => [] },
 
-    /*
-     * 参考组件库的api
-     * FORM: {}, // <Object> el-form组件attrs
-     * ITEM: {}, // <Object> el-form-item的attrs
-     */
-    API: {
-      type: Object,
-      default: () => ({
-        FORM: {},
-        ITEM: {},
-      }),
-    },
+    // 参考 el-form-item 组件库的api
+    "el-form-item": Object,
   },
   emits: ["update:modelValue"],
-  setup({ modelValue, options, API }, { emit, slots }) {
+  setup(props, { emit, slots, attrs }) {
     const Dictionaries = shallowRef({});
     axios
       .post("/jbk/ConfDocCommon/selectList", {
@@ -50,15 +40,18 @@ export default {
      * immediately => Boolean 是否调用查询
      */
     const onUpdate = (key, val, immediately) => {
-      modelValue[key] = val;
-      emit("update:modelValue", modelValue);
+      props["modelValue"][key] = val;
+      emit("update:modelValue", props["modelValue"]);
     };
+    /* 
+      清空内容
+    */
     const onClear = (key) => onUpdate(key, "", true);
 
     const generateVNode = (() => {
       // 组件基本配置
       const config = {
-        select: ({ key, options }) => [
+        select: ({ key, selectOptions }) => [
           {
             clearable: true,
             onChange: (val) => onUpdate(key, val, true),
@@ -70,16 +63,19 @@ export default {
                * 两种类型使用
                * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
                */
-              let DictionariesOptions = [];
-              if (typeof options === "string" && Dictionaries.value[options]) {
-                DictionariesOptions = Dictionaries.value[options].map(
+              let dictionariesOptions = [];
+              if (
+                typeof selectOptions === "string" &&
+                Dictionaries.value[selectOptions]
+              ) {
+                dictionariesOptions = Dictionaries.value[selectOptions].map(
                   ({ zidiandm, zidianz }) => ({
                     label: zidianz,
                     value: zidiandm,
                   })
                 );
               }
-              return DictionariesOptions.map(({ label, value }) => (
+              return dictionariesOptions.map(({ label, value }) => (
                 <el-option value={value} label={label} key={value} />
               ));
             },
@@ -92,7 +88,7 @@ export default {
             onClear: () => onClear(key),
           },
         ],
-        "date-picker": ({ label, key, attrs = {} }) => {
+        "date-picker": ({ label, key, attr = {} }) => {
           const Types = {
             date: {
               "value-format": "yyyy-MM-dd",
@@ -145,7 +141,7 @@ export default {
           return [
             {
               clearable: true,
-              ...Types[attrs["type"] || "date"],
+              ...Types[attr["type"] || "date"],
               onChange: (val) => onUpdate(key, val, true),
               onClear: () => onClear(key),
             },
@@ -153,16 +149,16 @@ export default {
         },
       };
       return (option) => {
-        const { type, label, key, attrs } = option;
+        const { type, label, key, attr } = option;
         const [Attrs, Slots] = config[type](option);
 
         return h(
           resolveComponent("el-" + type),
           {
-            modelValue: modelValue[key],
+            modelValue: props["modelValue"][key],
             placeholder: "请" + (type === "input" ? "输入" : "选择") + label,
             ...Attrs,
-            ...attrs,
+            ...attr,
           },
           Slots
         );
@@ -171,32 +167,22 @@ export default {
 
     return () =>
       h(
-        <el-form {...API["FORM"]}>
-          {
-            /*
-             * type: 元素类型
-             * label: form-item组件lable
-             * key: modelValue的键
-             * attrs: type组件API
-             * options: <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典
-             * items: form-item组件API
-             */
-            options.map((option) => {
-              const { key, label, items } = option;
-              return (
-                <el-form-item
-                  key={key}
-                  prop={key}
-                  {...API["ITEM"]}
-                  label={API["FORM"]["inline"] ? "" : label}
-                  style={API["FORM"]["inline"] ? "margin-bottom: 10px" : ""}
-                  {...items}
-                >
-                  {generateVNode(option)}
-                </el-form-item>
-              );
-            })
-          }
+        <el-form {...attrs}>
+          {props["options"].map((option) => {
+            const { key, label, item } = option;
+            return (
+              <el-form-item
+                key={key}
+                prop={key}
+                style={attrs["inline"] ? "margin-bottom: 10px" : ""}
+                {...props["el-form-item"]}
+                {...item}
+                label={attrs["inline"] ? "" : label}
+              >
+                {generateVNode(option)}
+              </el-form-item>
+            );
+          })}
           {slots.default && slots.default()}
         </el-form>
       );

@@ -1,41 +1,41 @@
 export default [{
   label: '姓名',
   key: 'xingming',
-  attrs: {
+  attr: {
     minWidth: 200,
   },
 }, {
   label: '保障号',
   key: 'jrbzh',
-  attrs: {
+  attr: {
     minWidth: 200
   }
 }, {
 
   label: '发文时间',
   key: 'fawensj',
-  attrs: {
+  attr: {
     minWidth: 200
   }
 }, {
 
   label: '文本名',
   key: 'wenbenmc',
-  attrs: {
+  attr: {
     minWidth: 200
   }
 }, {
 
   label: '发文单位',
   key: 'fawendw',
-  attrs: {
+  attr: {
     minWidth: 200
   }
 }, {
 
   label: '应用范围',
   key: 'yingyongfw',
-  attrs: {
+  attr: {
     minWidth: 200
   }
 }]

@@ -25,7 +25,7 @@ export default {
 
       SEARCHBAR: {}, // 搜索条件
 
-      TABLE: { data: [] }, // 表格数据
+      TABLE: [], // 表格数据
       // 分页
       PAGINATION: {
         total: 0,
@@ -55,8 +55,7 @@ export default {
           },
         })
           .then(({ data, total }) => {
-            State.TABLE.data = data;
-            console.log(State.TABLE);
+            State.TABLE = data;
             State.PAGINATION.total = total;
           })
           .finally(() => (State.LOADING = false));
@@ -71,11 +70,8 @@ export default {
           <Forms
             options={searchOptions}
             vModel={State.SEARCHBAR}
-            API={{
-              FORM: {
-                inline: true,
-              },
-            }}
+            inline
+            el-form-item={{ "label-width": "200px" }}
             v-slots={{
               default: () => (
                 <el-form-item>
@@ -115,11 +111,7 @@ export default {
             datas={State.TABLE}
             columns={columnsOptions}
             onSelectionChange={(rows) => console.log(rows)}
-            API={{
-              TABLE: {
-                type: "selection",
-              },
-            }}
+            type="selection"
             v-slots={{
               default: (
                 <el-table-column
@@ -172,19 +164,13 @@ export default {
                 <CForms
                   vModel={State.FORM}
                   options={formOptions}
-                  API={{
-                    required: true,
-                    FORM: {
-                      rules: {},
-                      // "label-width": "200px",
-                    },
-                    ITEM: {},
-                  }}
+                  required
                   onCancle={() => {
                     State.DIALOG.visible = false;
                   }}
                   onSubmit={() => {
-                    (State.DIALOG.visible = false), console.log(State.FORM);
+                    State.DIALOG.visible = false;
+                    console.log(State.FORM);
                   }}
                 />
               ),
