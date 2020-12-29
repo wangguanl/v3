@@ -2,6 +2,7 @@
 import axios from "@/basics/request.js";
 import { resolveComponent, shallowRef, h } from "vue";
 export default {
+  name: "Forms",
   inheritAttrs: false,
   props: {
     modelValue: { type: Object, default: () => ({}) }, // 双向数据绑定

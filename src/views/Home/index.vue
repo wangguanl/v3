@@ -8,15 +8,15 @@ import { mockTableData } from "./mock";
 /* 组件 */
 import Tables from "@/components/Tables";
 import Forms from "@/components/Forms";
-import Dialogs from "@/views/components/Dialogs";
-import CForms from "@/views/components/CForms";
+import CForms from "@/components/CForms";
 const components = {
   Tables,
-  Dialogs,
+  Forms,
   CForms,
 };
+import drag from "./hooks/drag";
 
-import { reactive, h } from "vue";
+import { reactive, h, ref, onMounted } from "vue";
 export default {
   setup() {
     // 响应式数据
@@ -33,10 +33,10 @@ export default {
         currentPage: 1,
       },
       DIALOG: {
-        visible: false,
+        modelValue: false,
         title: "",
         width: "1000px",
-        top: 0,
+        top: "0",
       },
 
       FORM: {},
@@ -64,6 +64,9 @@ export default {
 
     Methods.fetchGetTableData();
 
+    const dialogRef = ref(null);
+    drag(dialogRef);
+
     return () =>
       h(
         <div className="Wrap">
@@ -87,7 +90,7 @@ export default {
                   <el-button
                     type="primary"
                     onClick={() => {
-                      State.DIALOG.visible = true;
+                      State.DIALOG.modelValue = true;
                       State.DIALOG.title = "新增";
                     }}
                   >
@@ -113,7 +116,7 @@ export default {
             onSelectionChange={(rows) => console.log(rows)}
             type="selection"
             v-slots={{
-              default: (
+              default: () => (
                 <el-table-column
                   label="操作"
                   minWidth="200"
@@ -121,10 +124,11 @@ export default {
                   align="center"
                   v-slots={{
                     default: ({ row }) => (
-                      <div>
+                      <>
                         <el-button
                           onClick={() => {
-                            State.DIALOG.visible = true;
+                            State.DIALOG.modelValue = true;
+                            State.DIALOG.title = "编辑";
                             State.FORM = { ...row };
                           }}
                         >
@@ -133,7 +137,7 @@ export default {
                         <el-button onClick={() => console.log(row)}>
                           查看详情
                         </el-button>
-                      </div>
+                      </>
                     ),
                   }}
                 />
@@ -157,8 +161,10 @@ export default {
               Methods.fetchGetTableData();
             }}
           />
-          <Dialogs
-            v-model={State.DIALOG}
+          <el-dialog
+            ref={dialogRef}
+            {...State.DIALOG}
+            v-model={State.DIALOG.modelValue}
             v-slots={{
               default: () => (
                 <CForms
@@ -166,10 +172,10 @@ export default {
                   options={formOptions}
                   required
                   onCancle={() => {
-                    State.DIALOG.visible = false;
+                    State.DIALOG.modelValue = false;
                   }}
                   onSubmit={() => {
-                    State.DIALOG.visible = false;
+                    State.DIALOG.modelValue = false;
                     console.log(State.FORM);
                   }}
                 />
@@ -177,6 +183,8 @@ export default {
             }}
           />
         </div>
+        /* <Teleport to="body">
+      </Teleport> */
       );
   },
   components,
@@ -202,6 +210,32 @@ export default {
   & > .pagination {
     flex-shrink: 0;
     padding: 10px;
+  }
+  & > .el-overlay {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5vh 0;
+    box-sizing: border-box;
+    .el-dialog {
+      margin: unset;
+      // height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      .el-dialog__header {
+        flex-shrink: 0;
+        cursor: move;
+      }
+      .el-dialog__body {
+        height: 100%;
+        flex: 1;
+        overflow: hidden;
+      }
+    }
   }
 }
 </style>

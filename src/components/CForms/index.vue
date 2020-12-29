@@ -6,6 +6,7 @@ const components = {
   Forms,
 };
 export default {
+  name: "CForms",
   inheritAttrs: false,
   props: {
     modelValue: { type: Object, default: () => ({}) },
