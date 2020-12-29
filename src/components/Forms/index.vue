@@ -1,6 +1,6 @@
 <script>
-import axios from "@/basics/request.js";
-import { resolveComponent, shallowRef, h } from "vue";
+import { resolveComponent, h, computed } from "vue";
+import { useStore } from "vuex";
 export default {
   name: "Forms",
   inheritAttrs: false,
@@ -26,15 +26,8 @@ export default {
   },
   emits: ["update:modelValue"],
   setup(props, { emit, slots, attrs }) {
-    const Dictionaries = shallowRef({});
-    axios
-      .post("/jbk/ConfDocCommon/selectList", {
-        trans: "body",
-        data: [],
-      })
-      .then((datas) => {
-        Dictionaries.value = datas;
-      });
+    const Store = useStore();
+    const Dictionaries = computed(() => Store.state.dictionaries);
     /*
      * key => 键
      * val => 值
@@ -168,24 +161,31 @@ export default {
 
     return () =>
       h(
-        <el-form {...attrs}>
-          {props["options"].map((option) => {
-            const { key, label, item } = option;
-            return (
-              <el-form-item
-                key={key}
-                prop={key}
-                style={attrs["inline"] ? "margin-bottom: 10px" : ""}
-                {...props["el-form-item"]}
-                {...item}
-                label={attrs["inline"] ? "" : label}
-              >
-                {generateVNode(option)}
-              </el-form-item>
-            );
-          })}
-          {slots.default && slots.default()}
-        </el-form>
+        <el-form
+          {...attrs}
+          v-slots={{
+            default: () => (
+              <>
+                {props["options"].map((option) => {
+                  const { key, label, item } = option;
+                  return (
+                    <el-form-item
+                      key={key}
+                      prop={key}
+                      style={attrs["inline"] ? "margin-bottom: 10px" : ""}
+                      {...props["el-form-item"]}
+                      {...item}
+                      label={attrs["inline"] ? "" : label}
+                    >
+                      {generateVNode(option)}
+                    </el-form-item>
+                  );
+                })}
+                {Object.values(slots).map((slot) => slot())}
+              </>
+            ),
+          }}
+        />
       );
   },
 };

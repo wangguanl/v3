@@ -21,7 +21,7 @@ export default {
     },
   },
   emits: ["submit", "cancle"],
-  setup(props, { emit, attrs }) {
+  setup(props, { emit, attrs, slots }) {
     return () =>
       h(
         <div style="height: 100%; display: flex; flex-direction: column; overflow: hidden;">
@@ -34,6 +34,7 @@ export default {
             label-width="120px"
             model={props["modelValue"]}
             {...attrs}
+            {...slots}
           />
           <div style="display: flex; justify-content: center; flex-shrink: 0;">
             <el-button onClick={() => emit("cancle")}>取消</el-button>

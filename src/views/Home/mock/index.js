@@ -1,4 +1,4 @@
-export const mockTableData = ({ data }) => {
+export const MockTableData = ({ data }) => {
     return new Promise((resolve) => {
         const { currentPage, pageSize } = data;
         const DATA = [];
@@ -16,6 +16,6 @@ export const mockTableData = ({ data }) => {
         }
         setTimeout(() => {
             resolve({ data: DATA, total: 1000 });
-        }, 2000);
+        }, 1000);
     });
 };

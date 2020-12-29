@@ -3,20 +3,23 @@
 import { formOptions, searchOptions, columnsOptions } from "./config";
 
 /* 模拟数据 */
-import { mockTableData } from "./mock";
+import { MockTableData } from "./mock";
 
 /* 组件 */
-import Tables from "@/components/Tables";
+/* import Tables from "@/components/Tables";
 import Forms from "@/components/Forms";
 import CForms from "@/components/CForms";
 const components = {
   Tables,
   Forms,
   CForms,
-};
+}; */
 import drag from "./hooks/drag";
 
-import { reactive, h, ref, onMounted } from "vue";
+import { useStore } from "vuex";
+import { FetchPostConfDocCommonselectList } from "./api";
+
+import { reactive, h, ref, defineAsyncComponent } from "vue";
 export default {
   setup() {
     // 响应式数据
@@ -46,9 +49,10 @@ export default {
 
     // 方法
     const Methods = {
-      fetchGetTableData() {
+      // 获取表格数据
+      FetchGetTableData: () => {
         State.LOADING = true;
-        mockTableData({
+        MockTableData({
           data: {
             currentPage: State.PAGINATION.currentPage,
             pageSize: State.PAGINATION.pageSize,
@@ -60,10 +64,24 @@ export default {
           })
           .finally(() => (State.LOADING = false));
       },
+      // 获取字典集
+      FetchPostConfDocCommonselectList: () => {
+        const Store = useStore();
+        FetchPostConfDocCommonselectList({
+          other: {
+            trans: "body",
+          },
+          data: [],
+        }).then((data) => {
+          Store.dispatch("SET_Dictionaries", data);
+        });
+      },
     };
 
-    Methods.fetchGetTableData();
+    Methods.FetchGetTableData();
+    Methods.FetchPostConfDocCommonselectList();
 
+    // 设置dialog
     const dialogRef = ref(null);
     drag(dialogRef);
 
@@ -82,7 +100,7 @@ export default {
                     type="primary"
                     onClick={() => {
                       State.PAGINATION.currentPage = 1;
-                      Methods.fetchGetTableData();
+                      Methods.FetchGetTableData();
                     }}
                   >
                     搜索
@@ -154,11 +172,11 @@ export default {
             onSizeChange={(pageSize) => {
               State.PAGINATION.pageSize = pageSize;
               State.PAGINATION.currentPage = 1;
-              Methods.fetchGetTableData();
+              Methods.FetchGetTableData();
             }}
             onCurrentChange={(currentPage) => {
               State.PAGINATION.currentPage = currentPage;
-              Methods.fetchGetTableData();
+              Methods.FetchGetTableData();
             }}
           />
           <el-dialog
@@ -187,7 +205,11 @@ export default {
       </Teleport> */
       );
   },
-  components,
+  components: {
+    Tables: defineAsyncComponent(() => import("@/components/Tables")),
+    Forms: defineAsyncComponent(() => import("@/components/Forms")),
+    CForms: defineAsyncComponent(() => import("@/components/CForms")),
+  },
 };
 </script>
 

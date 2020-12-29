@@ -1,7 +1,4 @@
 export const baseURL = 'http://103.131.171.71:8087/';
-// export const baseURL = 'http://192.168.8.136:8087/';
-// export const baseURL = 'http://192.168.8.124:8088/';
-// export const baseURL = 'http://192.168.8.131:8088/';
 // export const baseImgURL = 'http://localhost:3000';
 export const baseImgURL = 'http://103.131.171.71:8056/file/';
 /* export const baseURL = location.protocol + '//' + location.hostname + ':3000/back/' */
@@ -23,82 +20,55 @@ let instance = axios.create({
     },
 
 });
+function encodeURIComponentData(data) {
+
+    let urlStr = '';
+    for (let k in data) {
+        if (data[k] == undefined) {
+            data[k] = '';
+        }
+        urlStr += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&';
+    }
+    return urlStr
+}
+
 
 // 拦截器设置全局请求参数
 instance.interceptors.request.use(config => {
-
     // 上传文件
     if (config.headers['Content-Type'] === "multipart/form-data") {
         return config;
     }
-
-    let sss = {}
-    let transData = {}
-
-    if (config.method === 'get' || config.method === 'delete') {
-        sss = config
-        transData = config.params
-    } else if (config.method === 'post') {
-        sss = {
-            trans: 'query',
-            ...config.data,
-        }
-        transData = config.data.data
-    }
-    let {
-        res, // 是否全部返回response
-        trans, // 是否将数据转为query形式
-    } = sss;
     // 处理数据
-    config.transformRequest = [(data = {}) => {
-        if (trans === 'query') {
-            let newData = '';
-            for (let k in transData) {
-                if (transData[k] == undefined) {
-                    transData[k] = '';
-                }
-                newData += encodeURIComponent(k) + '=' + encodeURIComponent(transData[k]) + '&';
-            }
-            config.url = config.url + ('?' + (newData.slice(0, -1)))
-        } else if (trans === 'body') {
-            return JSON.stringify(transData);
-        }
-    }]
+    if (config.method === 'get') {
+        config.url = config.url + ('?' + (encodeURIComponentData(config.params).slice(0, -1)))
+    } else if (config.method === 'post') {
+        config.data = JSON.stringify(config.data.data)
+    }
 
-    config.transformResponse = [data => {
-        return {
-            res,
-            ...JSON.parse(data)
-        };
-
-    }]
     return config;
-
 }, error => {
+
     ElMessage.error('网络错误！');
     return Promise.reject(error)
 });
 
 // 请求完成后 进行数据处理
-instance.interceptors.response.use(({
-    data
-}) => {
-    return data.data;
-    /* if (data.code == '0') {
+instance.interceptors.response.use((response) => {
+    console.log(response)
+    console.log(response.data)
+    const { data } = response
+    if (data.code == '0') {
         if (data.tips == true) {
             ElMessage.success(data.message);
         }
-        return data.res ? data : data.data;
+        return data.data;
     } else if (data.code == '-3') {
         ElMessage.warning(data.message);
-        // store.commit('SET_USERINFO');
-
     } else {
         ElMessage.error(data.message);
         return Promise.reject();
-    } */
-
-
+    }
 }, error => {
     if (error.message.code !== 200) {
         ElMessage.error('网络错误！');

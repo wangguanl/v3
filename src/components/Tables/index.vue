@@ -36,41 +36,46 @@ export default {
           border
           onSelectionChange={(selection) => emit("selection-change", selection)}
           {...attrs}
-        >
-          <el-table-column
-            type={attrs["type"]}
-            label="排序"
-            width="50"
-            fixed="left"
-            align="center"
-          />
-          {props["columns"].map(({ key, label, type, attr }) =>
-            h(
-              resolveComponent("el-table-column"),
-              {
-                // "show-overflow-tooltip": true,
-                ...props["el-table-column"],
-                label,
-                ...attr,
-              },
-              {
-                default: ({ row }) => {
-                  if (type === "img") {
-                    return (
-                      <el-image
-                        style="width: 100px; height: 100px"
-                        src={row[key]}
-                        fit="fill"
-                      />
-                    );
-                  }
-                  return row[key];
-                },
-              }
-            )
-          )}
-          {slots.default && slots.default()}
-        </el-table>
+          v-slots={{
+            default: () => (
+              <>
+                <el-table-column
+                  type={attrs["type"]}
+                  label="排序"
+                  width="50"
+                  fixed="left"
+                  align="center"
+                />
+                {props["columns"].map(({ key, label, type, attr }) =>
+                  h(
+                    resolveComponent("el-table-column"),
+                    {
+                      // "show-overflow-tooltip": true,
+                      ...props["el-table-column"],
+                      label,
+                      ...attr,
+                    },
+                    {
+                      default: ({ row }) => {
+                        if (type === "img") {
+                          return (
+                            <el-image
+                              style="width: 100px; height: 100px"
+                              src={row[key]}
+                              fit="fill"
+                            />
+                          );
+                        }
+                        return row[key];
+                      },
+                    }
+                  )
+                )}
+                {Object.values(slots).map((slot) => slot())}
+              </>
+            ),
+          }}
+        />
       );
   },
 };
