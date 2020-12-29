@@ -198,8 +198,7 @@ const plugins = [
     ElNotification, */
     ElLoading,
 ]
-export default function (app) {
+export default (app) => {
     components.forEach(component => app.component(component.name, component))
     plugins.forEach(plugin => app.use(plugin))
 }
-

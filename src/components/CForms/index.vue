@@ -37,10 +37,10 @@ export default {
             {...slots}
           />
           <div style="display: flex; justify-content: center; flex-shrink: 0;">
-            <el-button onClick={() => emit("cancle")}>取消</el-button>
             <el-button type="primary" onClick={() => emit("submit")}>
               保存
             </el-button>
+            <el-button onClick={() => emit("cancle")}>取消</el-button>
           </div>
         </div>
       );

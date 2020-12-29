@@ -54,19 +54,15 @@ instance.interceptors.request.use(config => {
 });
 
 // 请求完成后 进行数据处理
-instance.interceptors.response.use((response) => {
-    console.log(response)
-    console.log(response.data)
-    const { data } = response
-    if (data.code == '0') {
-        if (data.tips == true) {
-            ElMessage.success(data.message);
-        }
-        return data.data;
-    } else if (data.code == '-3') {
-        ElMessage.warning(data.message);
+instance.interceptors.response.use(({ data }) => {
+    const { result, code, message } = data;
+    if (code == 200) {
+        /* if (tips == true) {
+            ElMessage.success(message);
+        } */
+        return result;
     } else {
-        ElMessage.error(data.message);
+        ElMessage.error(message);
         return Promise.reject();
     }
 }, error => {

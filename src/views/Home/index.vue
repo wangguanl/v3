@@ -17,7 +17,7 @@ const components = {
 import drag from "./hooks/drag";
 
 import { useStore } from "vuex";
-import { FetchPostConfDocCommonselectList } from "./api";
+// import { FetchPostConfDocCommonselectList } from "./api";
 
 import { reactive, h, ref, defineAsyncComponent } from "vue";
 export default {
@@ -65,7 +65,7 @@ export default {
           .finally(() => (State.LOADING = false));
       },
       // 获取字典集
-      FetchPostConfDocCommonselectList: () => {
+      /* FetchPostConfDocCommonselectList: () => {
         const Store = useStore();
         FetchPostConfDocCommonselectList({
           other: {
@@ -75,11 +75,11 @@ export default {
         }).then((data) => {
           Store.dispatch("SET_Dictionaries", data);
         });
-      },
+      }, */
     };
 
     Methods.FetchGetTableData();
-    Methods.FetchPostConfDocCommonselectList();
+    // Methods.FetchPostConfDocCommonselectList();
 
     // 设置dialog
     const dialogRef = ref(null);
@@ -95,7 +95,7 @@ export default {
             el-form-item={{ "label-width": "200px" }}
             v-slots={{
               default: () => (
-                <el-form-item>
+                <el-form-item style="margin-bottom: 10px">
                   <el-button
                     type="primary"
                     onClick={() => {
@@ -232,6 +232,9 @@ export default {
   & > .pagination {
     flex-shrink: 0;
     padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
   }
   & > .el-overlay {
     height: 100%;
