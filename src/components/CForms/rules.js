@@ -3,12 +3,12 @@
  * 1. el-form 组件的 rules
  * 2. el-form-item 组件的 rules 与 required
  */
-export default (props, attrs) => {
+export default ({ options, required }, attrs) => {
     // 集成表单的rules
     const Rules = { ...attrs["rules"] };
 
     // 将option展开并去除null、undefined等空值
-    const arr = props["options"].flat().filter((option) => {
+    const arr = options.flat().filter((option) => {
         if (option && !Rules[option.key]) {
             Rules[option.key] = [];
         }
@@ -21,7 +21,7 @@ export default (props, attrs) => {
         trigger: type === "input" ? "blur" : "change",
     });
     // 全局必填项，设置每一个值都是必填项
-    if (props["required"]) {
+    if (required) {
         arr.forEach(({ type, label, key, item = {} }) => {
             const { rules = [] } = item;
             Rules[key].unshift(useRequiredRule(type, label));

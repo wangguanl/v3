@@ -6,4 +6,7 @@ module.exports = {
             .plugin('webpack-bundle-analyzer')
             .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
     } */
+    /* devServer: {
+        before: require('./mock/mock-server.js')
+    }, */
 }

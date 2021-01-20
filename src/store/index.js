@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'
-
+import router, { ResetRouter } from '@/router';
 const modulesFiles = require.context('./modules', true, /\.js$/);
 const modules = modulesFiles.keys().reduce((modules, modulePath) => {
   const moduleName = modulePath.replace(/^\.\/(.*)\.\w+$/, '$1');
@@ -8,7 +8,7 @@ const modules = modulesFiles.keys().reduce((modules, modulePath) => {
   return modules;
 }, {});
 
-export default createStore({
+const store = createStore({
   state: {
     // 用户信息
     userinfo: {},
@@ -40,7 +40,7 @@ export default createStore({
         state.userinfo = {};
         localStorage.removeItem('userinfo')
         store.commit('permission/SET_ROUTERS', [])
-        resetRouter();
+        ResetRouter();
         router.replace('/login')
       }
     },
@@ -94,3 +94,4 @@ export default createStore({
   },
   modules
 })
+export default store;

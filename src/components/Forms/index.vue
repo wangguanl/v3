@@ -10,13 +10,13 @@ export default {
     /* 
       * 渲染格式（数据模型）
       * {
-         * type: 'input', //  <String> el-[type] 元素类型
-         * label: '姓名', //  <String> 表单label
-         * key: 'xingming',  // <String> 表单key
-         * selectOptions: '', // <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
+         * type: 'input',  <String> el-[type] 元素类型
+         * label: '姓名',  <String> 表单label
+         * key: 'xingming',  <String> 表单key
+         * selectOptions: '', <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
          * 参考组件库的api
-         * attr: {}, // <Object> el-[type]元素的attrs
-         * item: {}, // <Object> el-form-item的attrs
+         * attr: {}, <Object> el-[type]元素的attrs
+         * item: {}, <Object> el-form-item的attrs
         }
      */
     options: { type: Array, default: () => [] },

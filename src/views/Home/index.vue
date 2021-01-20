@@ -16,7 +16,7 @@ const components = {
 }; */
 import drag from "./hooks/drag";
 
-import { useStore } from "vuex";
+// import { useStore } from "vuex";
 // import { FetchPostConfDocCommonselectList } from "./api";
 
 import { reactive, h, ref, defineAsyncComponent } from "vue";

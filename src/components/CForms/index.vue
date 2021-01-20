@@ -21,18 +21,18 @@ export default {
     },
   },
   emits: ["submit", "cancle"],
-  setup(props, { emit, attrs, slots }) {
+  setup({ modelValue, options, required }, { emit, attrs, slots }) {
     return () =>
       h(
         <div style="height: 100%; display: flex; flex-direction: column; overflow: hidden;">
           <Forms
-            options={props["options"]}
-            vModel={props["modelValue"]}
+            options={options}
+            vModel={modelValue}
             style="flex: 1; overflow: auto; "
-            rules={generateRules(props, attrs)}
+            rules={generateRules({ options, required }, attrs)}
             label-position="right"
             label-width="120px"
-            model={props["modelValue"]}
+            model={modelValue}
             {...attrs}
             {...slots}
           />
