@@ -11,20 +11,23 @@ router.beforeEach(async (to, from, next) => {
     NProgress.start();
     // 终止所有请求
     store.commit('REMOVE_PENGDINGS');
+    if (to.path !== '/login') {
+        // 获取权限
+        if (!(store.getters['permission/asyncRouterMap'].length)) {
+            store.dispatch('SET_Dictionaries', dictionaries)
+            const Routes = await store.dispatch('permission/GenerateRoutes')
 
-    // 获取权限
-    if (!(store.getters['permission/asyncRouterMap'].length)) {
-        const Routes = await store.dispatch('permission/GenerateRoutes')
-        router.addRoute(Routes[0]);
-        next({
-            path: '/'
-        });
-        // 获取字典
-    } else if (JSON.stringify(store.getters['dictionaries']) === '{}') {
-        store.dispatch('SET_Dictionaries', dictionaries)
-        next({
-            path: '/'
-        });
+            router.addRoute(...Routes);
+            next({
+                name: Routes[0].children[0].name
+            });
+            // 获取字典
+        } /* else if (JSON.stringify(store.getters['dictionaries']) === '{}') {
+            store.dispatch('SET_Dictionaries', dictionaries)
+            next('/');
+        } */ else {
+            next();
+        }
     } else {
         next();
     }

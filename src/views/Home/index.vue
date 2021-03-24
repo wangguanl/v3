@@ -14,12 +14,20 @@ const components = {
   Forms,
   CForms,
 }; */
-import drag from "./hooks/drag";
+import hookDrag from "./hooks/drag";
+import utilDrag from "./utils/drag";
 
 // import { useStore } from "vuex";
 // import { FetchPostConfDocCommonselectList } from "./api";
 
-import { reactive, h, ref, defineAsyncComponent } from "vue";
+import {
+  Teleport,
+  reactive,
+  h,
+  ref,
+  defineAsyncComponent,
+  onMounted,
+} from "vue";
 export default {
   setup() {
     // 响应式数据
@@ -83,7 +91,10 @@ export default {
 
     // 设置dialog
     const dialogRef = ref(null);
-    drag(dialogRef);
+    // hookDrag(dialogRef);
+    onMounted(() => {
+      utilDrag(dialogRef.value.dialogRef);
+    });
 
     return () =>
       h(
@@ -145,6 +156,7 @@ export default {
                       <>
                         <el-button
                           onClick={() => {
+                            console.log(row);
                             State.DIALOG.modelValue = true;
                             State.DIALOG.title = "编辑";
                             State.FORM = { ...row };
@@ -200,15 +212,27 @@ export default {
               ),
             }}
           />
+          <Teleport to="body"></Teleport>
         </div>
-        /* <Teleport to="body">
-      </Teleport> */
       );
   },
   components: {
     Tables: defineAsyncComponent(() => import("@/components/Tables")),
     Forms: defineAsyncComponent(() => import("@/components/Forms")),
     CForms: defineAsyncComponent(() => import("@/components/CForms")),
+  },
+  directives: {
+    // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案
+    drag: {
+      created() {},
+      mounted() {},
+    },
+    /* 设想2 */
+    // 控制dialog的缩放
+    zoom: {},
+    /* 设想3 */
+    // 控制dialog的最小化、还原
+    minimize: {},
   },
 };
 </script>

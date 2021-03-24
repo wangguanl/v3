@@ -1,6 +1,6 @@
 export const constantRouterMap = [{
     path: '/',
-    component: () => import('@/views/Layout'),
+    component: () => import(/*webpackChunkName: "Layout"*/'@/views/Layout'),
     meta: {
         icon: '',
         title: '首页'
@@ -8,7 +8,7 @@ export const constantRouterMap = [{
     children: []
 }, {
     path: '/Login',
-    component: () => import('@/views/Login'),
+    component: () => import(/*webpackChunkName: "Login"*/ '@/views/Login'),
     meta: {
         icon: '',
         title: '登录'

@@ -35,6 +35,7 @@ const Permission = {
                 } = generaterRoutes(asyncRoutesData);
                 commit('SET_ROUTERS', asyncRoutes);
                 const R = deepCopy(constantRouterMap)
+                R[0].redirect = { name: addRoutes[0].name };
                 R[0].children = addRoutes;
                 resolve(R)
                 /* resolve([...R, {
