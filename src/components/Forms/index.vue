@@ -85,7 +85,6 @@ export default {
         "date-picker": ({ label, key, attr = {} }) => {
           const Types = {
             date: {
-              "value-format": "yyyy-MM-dd",
               shortcuts: [
                 {
                   text: "今天",
@@ -94,7 +93,6 @@ export default {
               ],
             },
             daterange: {
-              "value-format": "yyyy-MM-dd",
               "range-separator": "-",
               "start-placeholder": label + "开始日期",
               "end-placeholder": label + "结束日期",
@@ -128,16 +126,12 @@ export default {
                 },
               ],
             },
-            month: {
-              "value-format": "yyyy-MM",
-            },
+            month: {},
           };
           return [
             {
-              clearable: true,
               ...Types[attr["type"] || "date"],
               onChange: (val) => onUpdate(key, val, true),
-              onClear: () => onClear(key),
             },
           ];
         },

@@ -26,7 +26,7 @@ export default [{
     type: 'select',
     label: '性别',
     key: 'xingbie',
-    options: 'XINGBIE',
+    selectOptions: 'XINGBIE',
     attr: {
     },
 }]
