@@ -61,7 +61,7 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <router-link to="/Password">
+              <router-link to="/Login">
                 <el-dropdown-item> 修改密码 </el-dropdown-item>
               </router-link>
               <el-dropdown-item divided @click="onLogout">

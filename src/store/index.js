@@ -41,7 +41,7 @@ const store = createStore({
         localStorage.removeItem('userinfo')
         store.commit('permission/SET_ROUTERS', [])
         ResetRouter();
-        router.replace('/login')
+        router.replace('/Login')
       }
     },
 
@@ -85,6 +85,7 @@ const store = createStore({
         resolve();
       })
     },
+    // 设置全局字典
     SET_Dictionaries({ commit }, data) {
       return new Promise((resolve, reject) => {
         commit('SET_Dictionaries', data);

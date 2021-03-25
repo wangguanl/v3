@@ -1,7 +1,7 @@
 export default [{
     type: 'input',
     label: '姓名',
-    key: 'xingming',
+    key: 'name',
     attr: {
         required: true,
         rules: [],
@@ -11,22 +11,15 @@ export default [{
 },
 {
     type: 'input',
-    label: '保障号',
-    key: 'jrbzh',
-    attr: {
-    },
-},
-{
-    type: 'input',
-    key: 'zhengjianbh',
-    label: '证件编号',
+    label: 'qq',
+    key: 'qq',
     attr: {
     },
 }, {
     type: 'select',
     label: '性别',
-    key: 'xingbie',
-    selectOptions: 'XINGBIE',
+    key: 'gender',
+    selectOptions: 'gender',
     attr: {
     },
 }]

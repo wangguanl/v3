@@ -1,41 +1,35 @@
 export default [{
   label: '姓名',
-  key: 'xingming',
+  key: 'name',
   attr: {
-    minWidth: 200,
+    width: 160,
   },
 }, {
-  label: '保障号',
-  key: 'jrbzh',
+  label: 'qq',
+  key: 'qq',
   attr: {
-    minWidth: 200
+    width: 160,
   }
 }, {
-
-  label: '发文时间',
-  key: 'fawensj',
+  label: '性别',
+  key: 'genderName',
   attr: {
-    minWidth: 200
+    width: 60,
   }
 }, {
-
-  label: '文本名',
-  key: 'wenbenmc',
+  label: '内容',
+  key: 'content',
   attr: {
-    minWidth: 200
+    minWidth: 200,
+    align: 'left'
   }
 }, {
-
-  label: '发文单位',
-  key: 'fawendw',
+  label: '创建时间',
+  key: 'createTime',
   attr: {
-    minWidth: 200
+    width: 200
   }
-}, {
-
-  label: '应用范围',
-  key: 'yingyongfw',
-  attr: {
-    minWidth: 200
-  }
-}]
+}].map(item => {
+  item.attr.align = item.attr.align || 'center';
+  return item;
+})

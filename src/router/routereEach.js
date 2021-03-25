@@ -4,17 +4,14 @@ import 'nprogress/nprogress.css' // Progress 进度条样式
 import router, { ResetRouter } from '@/router'
 import store from '@/store'
 
-import dictionaries from '@/mock/dictionaries'
-
 // 全局路由跳转之前触发
 router.beforeEach(async (to, from, next) => {
     NProgress.start();
     // 终止所有请求
     store.commit('REMOVE_PENGDINGS');
-    if (to.path !== '/login') {
+    if (to.path !== '/Login') {
         // 获取权限
         if (!(store.getters['permission/asyncRouterMap'].length)) {
-            store.dispatch('SET_Dictionaries', dictionaries)
             const Routes = await store.dispatch('permission/GenerateRoutes')
 
             router.addRoute(...Routes);
@@ -22,10 +19,7 @@ router.beforeEach(async (to, from, next) => {
                 name: Routes[0].children[0].name
             });
             // 获取字典
-        } /* else if (JSON.stringify(store.getters['dictionaries']) === '{}') {
-            store.dispatch('SET_Dictionaries', dictionaries)
-            next('/');
-        } */ else {
+        } else {
             next();
         }
     } else {
@@ -42,7 +36,7 @@ router.beforeEach(async (to, from, next) => {
     
     // 已登录
     if (store.getters.token) {
-        if (to.path === '/login') {
+        if (to.path === '/Login') {
             NProgress.done();
             next({
                 path: '/'
@@ -62,11 +56,11 @@ router.beforeEach(async (to, from, next) => {
             }
         }
     } else {
-        if (to.path !== '/login') {
+        if (to.path !== '/Login') {
             next({
-                path: '/login'
+                path: '/Login'
             });
-        } else if (to.path === '/login') {
+        } else if (to.path === '/Login') {
             NProgress.done();
             next();
         }

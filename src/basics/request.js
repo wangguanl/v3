@@ -1,4 +1,4 @@
-export const baseURL = 'http://103.131.171.71:8087/';
+// export const baseURL = 'http://103.131.171.71:8087/';
 // export const baseImgURL = 'http://localhost:3000';
 export const baseImgURL = 'http://103.131.171.71:8056/file/';
 /* export const baseURL = location.protocol + '//' + location.hostname + ':3000/back/' */
@@ -12,7 +12,7 @@ import {
     axios请求配置
  */
 let instance = axios.create({
-    baseURL,
+    baseURL: '/',
     timeout: 60000,
     headers: {
         'Content-Type': 'application/json;charset=utf-8',
@@ -20,17 +20,6 @@ let instance = axios.create({
     },
 
 });
-function encodeURIComponentData(data) {
-
-    let urlStr = '';
-    for (let k in data) {
-        if (data[k] == undefined) {
-            data[k] = '';
-        }
-        urlStr += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&';
-    }
-    return urlStr
-}
 
 
 // 拦截器设置全局请求参数
@@ -43,7 +32,7 @@ instance.interceptors.request.use(config => {
     if (config.method === 'get') {
         config.url = config.url + ('?' + (encodeURIComponentData(config.params).slice(0, -1)))
     } else if (config.method === 'post') {
-        config.data = JSON.stringify(config.data.data)
+        config.data = config.data ? JSON.stringify(config.data.data) : {}
     }
 
     return config;
@@ -73,5 +62,17 @@ instance.interceptors.response.use(({ data }) => {
         return Promise.reject('手动终止请求');
     }
 });
+
+function encodeURIComponentData(data) {
+
+    let urlStr = '';
+    for (let k in data) {
+        if (data[k] == undefined) {
+            data[k] = '';
+        }
+        urlStr += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&';
+    }
+    return urlStr
+}
 
 export default instance;

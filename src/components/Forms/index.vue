@@ -63,9 +63,9 @@ export default {
                 Dictionaries.value[selectOptions]
               ) {
                 dictionariesOptions = Dictionaries.value[selectOptions].map(
-                  ({ zidiandm, zidianz }) => ({
-                    label: zidianz,
-                    value: zidiandm,
+                  ({ value, label }) => ({
+                    label,
+                    value,
                   })
                 );
               }

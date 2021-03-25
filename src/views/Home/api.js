@@ -1,2 +1,3 @@
 import axios from "@/basics/request.js";
-export const FetchPostConfDocCommonselectList = (sendData) => axios.post("/jbk/ConfDocCommon/selectList", sendData)
+export const FetchPostDictionaries = (sendData) => axios.post("/dictionaries", sendData)
+export const FetchPostTableData = (sendData) => axios.post("/tables", sendData)

@@ -3,22 +3,13 @@
 import { formOptions, searchOptions, columnsOptions } from "./config";
 
 /* 模拟数据 */
-import { MockTableData } from "./mock";
+import { FetchPostDictionaries, FetchPostTableData } from "./api";
 
-/* 组件 */
-/* import Tables from "@/components/Tables";
-import Forms from "@/components/Forms";
-import CForms from "@/components/CForms";
-const components = {
-  Tables,
-  Forms,
-  CForms,
-}; */
+/*  */
 import hookDrag from "./hooks/drag";
 import utilDrag from "./utils/drag";
 
-// import { useStore } from "vuex";
-// import { FetchPostConfDocCommonselectList } from "./api";
+import { useStore } from "vuex";
 
 import {
   Teleport,
@@ -27,8 +18,33 @@ import {
   ref,
   defineAsyncComponent,
   onMounted,
+  Suspense,
 } from "vue";
 export default {
+  components: {
+    Tables: defineAsyncComponent(() =>
+      import(/*webpackChunkName: "Tables"*/ "@/components/Tables")
+    ),
+    Forms: defineAsyncComponent(() =>
+      import(/*webpackChunkName: "Forms"*/ "@/components/Forms")
+    ),
+    CForms: defineAsyncComponent(() =>
+      import(/*webpackChunkName: "CForms"*/ "@/components/CForms")
+    ),
+  },
+  directives: {
+    // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案
+    drag: {
+      created() {},
+      mounted() {},
+    },
+    /* 设想2 */
+    // 控制dialog的缩放
+    zoom: {},
+    /* 设想3 */
+    // 控制dialog的最小化、还原
+    minimize: {},
+  },
   setup() {
     // 响应式数据
     const State = reactive({
@@ -57,37 +73,37 @@ export default {
 
     // 方法
     const Methods = {
+      // 获取字典集
+      FetchPostDictionaries: () => {
+        return new Promise(async (resolve, reject) => {
+          const Store = useStore();
+          const Dictionaries = await FetchPostDictionaries();
+          await Store.dispatch("SET_Dictionaries", Dictionaries);
+          resolve();
+        });
+      },
       // 获取表格数据
-      FetchGetTableData: () => {
+      FetchPostTableData: () => {
         State.LOADING = true;
-        MockTableData({
-          data: {
-            currentPage: State.PAGINATION.currentPage,
-            pageSize: State.PAGINATION.pageSize,
-          },
+        const { name, qq, gender } = State.SEARCHBAR;
+        const { currentPage, pageSize } = State.PAGINATION;
+        FetchPostTableData({
+          data: { name, qq, gender, currentPage, pageSize },
         })
           .then(({ data, total }) => {
-            State.TABLE = data;
+            State.TABLE = data.map((item) => {
+              item.genderName = ["女", "男"][item.gender];
+              return item;
+            });
             State.PAGINATION.total = total;
           })
           .finally(() => (State.LOADING = false));
       },
-      // 获取字典集
-      /* FetchPostConfDocCommonselectList: () => {
-        const Store = useStore();
-        FetchPostConfDocCommonselectList({
-          other: {
-            trans: "body",
-          },
-          data: [],
-        }).then((data) => {
-          Store.dispatch("SET_Dictionaries", data);
-        });
-      }, */
     };
 
-    Methods.FetchGetTableData();
-    // Methods.FetchPostConfDocCommonselectList();
+    Methods.FetchPostDictionaries().then(() => {
+      Methods.FetchPostTableData();
+    });
 
     // 设置dialog
     const dialogRef = ref(null);
@@ -98,6 +114,7 @@ export default {
 
     return () =>
       h(
+        // <Suspense>
         <div className="Wrap">
           <Forms
             options={searchOptions}
@@ -106,34 +123,40 @@ export default {
             el-form-item={{ "label-width": "200px" }}
             v-slots={{
               default: () => (
-                <el-form-item style="margin-bottom: 10px">
-                  <el-button
-                    type="primary"
-                    onClick={() => {
-                      State.PAGINATION.currentPage = 1;
-                      Methods.FetchGetTableData();
-                    }}
-                  >
-                    搜索
-                  </el-button>
-                  <el-button
-                    type="primary"
-                    onClick={() => {
-                      State.DIALOG.modelValue = true;
-                      State.DIALOG.title = "新增";
-                    }}
-                  >
-                    新增
-                  </el-button>
-                  <el-button
-                    type="danger"
-                    onClick={() => {
-                      console.log("批量删除");
-                    }}
-                  >
-                    批量删除
-                  </el-button>
-                </el-form-item>
+                <>
+                  <el-form-item style="margin-bottom: 10px">
+                    <el-button
+                      type="primary"
+                      onClick={() => {
+                        State.PAGINATION.currentPage = 1;
+                        Methods.FetchPostTableData();
+                      }}
+                    >
+                      搜索
+                    </el-button>
+                  </el-form-item>
+
+                  <el-form-item style="margin-bottom: 10px;float: right;">
+                    <el-button
+                      type="primary"
+                      onClick={() => {
+                        State.FORM = {};
+                        State.DIALOG.modelValue = true;
+                        State.DIALOG.title = "新增";
+                      }}
+                    >
+                      新增
+                    </el-button>
+                    <el-button
+                      type="danger"
+                      onClick={() => {
+                        console.log("批量删除");
+                      }}
+                    >
+                      批量删除
+                    </el-button>
+                  </el-form-item>
+                </>
               ),
             }}
           />
@@ -148,7 +171,7 @@ export default {
               default: () => (
                 <el-table-column
                   label="操作"
-                  minWidth="200"
+                  width="200"
                   fixed="right"
                   align="center"
                   v-slots={{
@@ -184,11 +207,11 @@ export default {
             onSizeChange={(pageSize) => {
               State.PAGINATION.pageSize = pageSize;
               State.PAGINATION.currentPage = 1;
-              Methods.FetchGetTableData();
+              Methods.FetchPostTableData();
             }}
             onCurrentChange={(currentPage) => {
               State.PAGINATION.currentPage = currentPage;
-              Methods.FetchGetTableData();
+              Methods.FetchPostTableData();
             }}
           />
           <el-dialog
@@ -214,25 +237,8 @@ export default {
           />
           <Teleport to="body"></Teleport>
         </div>
+        // </Suspense>
       );
-  },
-  components: {
-    Tables: defineAsyncComponent(() => import("@/components/Tables")),
-    Forms: defineAsyncComponent(() => import("@/components/Forms")),
-    CForms: defineAsyncComponent(() => import("@/components/CForms")),
-  },
-  directives: {
-    // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案
-    drag: {
-      created() {},
-      mounted() {},
-    },
-    /* 设想2 */
-    // 控制dialog的缩放
-    zoom: {},
-    /* 设想3 */
-    // 控制dialog的最小化、还原
-    minimize: {},
   },
 };
 </script>
