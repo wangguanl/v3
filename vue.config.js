@@ -2,7 +2,7 @@ module.exports = {
     // publicPath: './', // 相对路径
     productionSourceMap: false,
     devServer: {
-        before: require('./mock/mock-server.js')
+        before: require('./mock')
     },
     /* chainWebpack: config => {
         config

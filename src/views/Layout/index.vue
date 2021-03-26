@@ -137,7 +137,7 @@ export default {
 }
 
 .el-scrollbar {
-  ::v-deep .el-scrollbar__wrap {
+  :deep(.el-scrollbar__wrap) {
     overflow-x: hidden;
   }
 }

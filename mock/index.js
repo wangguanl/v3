@@ -1,60 +1,70 @@
-const Mock = require('mockjs')
-const { param2Obj } = require('./utils')
+const chokidar = require('chokidar')
+const bodyParser = require('body-parser')
+const chalk = require('chalk')
+const path = require('path')
+const mockDir = path.join(process.cwd(), 'mock')
 
-const user = require('./user')
-const role = require('./role')
-const article = require('./article')
-const search = require('./remote-search')
-
-const mocks = [
-  ...user,
-  ...role,
-  ...article,
-  ...search
-]
-
-// for front mock
-// please use it cautiously, it will redefine XMLHttpRequest,
-// which will cause many of your third-party libraries to be invalidated(like progress event).
-function mockXHR() {
-  // mock patch
-  // https://github.com/nuysoft/Mock/issues/300
-  Mock.XHR.prototype.proxy_send = Mock.XHR.prototype.send
-  Mock.XHR.prototype.send = function() {
-    if (this.custom.xhr) {
-      this.custom.xhr.withCredentials = this.withCredentials || false
-
-      if (this.responseType) {
-        this.custom.xhr.responseType = this.responseType
-      }
-    }
-    this.proxy_send(...arguments)
-  }
-
-  function XHR2ExpressReqWrap(respond) {
-    return function(options) {
-      let result = null
-      if (respond instanceof Function) {
-        const { body, type, url } = options
-        // https://expressjs.com/en/4x/api.html#req
-        result = respond({
-          method: type,
-          body: JSON.parse(body),
-          query: param2Obj(url)
-        })
-      } else {
-        result = respond
-      }
-      return Mock.mock(result)
-    }
-  }
-
-  for (const i of mocks) {
-    Mock.mock(new RegExp(i.url), i.type || 'get', XHR2ExpressReqWrap(i.response))
+// 注册路由
+function registerRoutes(app) {
+  let mockLastIndex
+  const Mocks = require('./modules/home')
+  Mocks.map(({ url, type = 'get', response }) => {
+    app[type](new RegExp(url), (req, res) => res.json({
+      code: 200,
+      result: response(req)
+    }))
+    mockLastIndex = app._router.stack.length
+  })
+  const mockRoutesLength = Object.keys(Mocks).length
+  return {
+    mockRoutesLength: mockRoutesLength,
+    mockStartIndex: mockLastIndex - mockRoutesLength
   }
 }
 
-module.exports = {
-  mocks,
-  mockXHR
+// 清除缓存 注销缓存内已注册的路由
+function unregisterRoutes() {
+  Object.keys(require.cache).forEach(i => {
+    if (i.includes(mockDir)) {
+      delete require.cache[require.resolve(i)]
+    }
+  })
+}
+
+
+module.exports = app => {
+  // parse app.body
+  // https://expressjs.com/en/4x/api.html#req.body
+  app.use(bodyParser.json())
+  app.use(bodyParser.urlencoded({
+    extended: true
+  }))
+
+  const mockRoutes = registerRoutes(app)
+  var mockRoutesLength = mockRoutes.mockRoutesLength
+  var mockStartIndex = mockRoutes.mockStartIndex
+
+  // 监听文件改动，热更新服务
+  chokidar.watch(mockDir, {
+    ignored: /mock-server/,
+    ignoreInitial: true
+  }).on('all', (event, path) => {
+    if (event === 'change' || event === 'add') {
+      try {
+        // 监听文件改动，清空已经注册的路由stack
+        app._router.stack.splice(mockStartIndex, mockRoutesLength)
+
+        // 清除已缓存的路由
+        unregisterRoutes()
+
+        const mockRoutes = registerRoutes(app)
+        mockRoutesLength = mockRoutes.mockRoutesLength
+        mockStartIndex = mockRoutes.mockStartIndex
+
+        console.log(chalk.magentaBright(`\n > Mock Server hot reload success! changed  ${path}`))
+      } catch (error) {
+        console.log(chalk.redBright(error))
+      }
+    }
+  })
 }
