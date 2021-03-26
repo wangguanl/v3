@@ -5,7 +5,7 @@ import {
 
 import {
   constantRouterMap,
-} from './routers'
+} from './routes'
 
 const CreateRouter = () => createRouter({
   history: createWebHistory(process.env.BASE_URL),

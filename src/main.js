@@ -6,7 +6,8 @@ import router from '@/router'
 import store from '@/store'
 const app = createApp(App);
 
-import '@/router/routereEach'
+/* 全局路由拦截 */
+import '@/router/routerEach'
 
 /* 全局样式 */
 import '@/assets/css/index.scss';

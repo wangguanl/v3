@@ -1,5 +1,5 @@
 module.exports = {
-    publicPath: './', // 相对路径
+    // publicPath: './', // 相对路径
     productionSourceMap: false,
     devServer: {
         before: require('./mock/mock-server.js')

@@ -4,7 +4,6 @@
       <el-scrollbar :native="false" style="height: 100%; overflow: hidden">
         <el-menu
           class="el-menu-vertical-demo"
-          mode="vertical"
           :collapse="isCollapse"
           background-color="#304156"
           text-color="#bfcbd9"
@@ -13,9 +12,10 @@
           :router="true"
         >
           <sidebar-item
-            :isCollapse="isCollapse"
-            :routes="routes"
-          ></sidebar-item>
+            v-for="router in routes"
+            :router="router"
+            :key="router.name"
+          />
         </el-menu>
       </el-scrollbar>
     </el-aside>
@@ -61,7 +61,9 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <router-link to="/Login">
+              <router-link
+                :to="{ name: 'Login', params: { source: '修改密码' } }"
+              >
                 <el-dropdown-item> 修改密码 </el-dropdown-item>
               </router-link>
               <el-dropdown-item divided @click="onLogout">
@@ -83,7 +85,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { mapMutations } from "vuex";
 import { defineAsyncComponent } from "vue";
 export default {
   data() {
@@ -94,28 +96,20 @@ export default {
   },
   methods: {
     ...mapMutations(["SET_USERINFO"]),
-    useGetBreadcrumb() {
-      let matched = this.$route.matched.filter((item) => item.name);
-      const first = matched[0];
-      if (first && first.name !== "home") {
-        matched = [{ path: "/", meta: { title: "首页" } }].concat(matched);
-      }
-      this.levelList = matched;
-    },
     onLogout() {
       this.SET_USERINFO();
     },
   },
   computed: {
-    ...mapGetters({
-      routes: "permission/asyncRouterMap",
-    }),
+    routes() {
+      return this.$route.matched[0].children;
+    },
   },
 
   watch: {
     $route: {
       handler() {
-        this.useGetBreadcrumb();
+        this.levelList = this.$route.matched.filter((item) => item.name);
       },
       immediate: true,
     },
@@ -139,7 +133,6 @@ export default {
 }
 .el-menu-vertical-demo:not(.el-menu--collapse) {
   width: 200px;
-  min-height: 400px;
   border-right: none;
 }
 

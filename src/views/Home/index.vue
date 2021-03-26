@@ -77,8 +77,8 @@ export default {
       FetchPostDictionaries: () => {
         return new Promise(async (resolve, reject) => {
           const Store = useStore();
-          const Dictionaries = await FetchPostDictionaries();
-          await Store.dispatch("SET_Dictionaries", Dictionaries);
+          const data = await FetchPostDictionaries();
+          await Store.commit("SET_DICTIONARIES", data);
           resolve();
         });
       },

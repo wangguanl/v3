@@ -1,5 +1,3 @@
-import { createStore } from 'vuex'
-import router, { ResetRouter } from '@/router';
 const modulesFiles = require.context('./modules', true, /\.js$/);
 const modules = modulesFiles.keys().reduce((modules, modulePath) => {
   const moduleName = modulePath.replace(/^\.\/(.*)\.\w+$/, '$1');
@@ -8,25 +6,22 @@ const modules = modulesFiles.keys().reduce((modules, modulePath) => {
   return modules;
 }, {});
 
-const store = createStore({
+import { createStore } from 'vuex'
+import router, { ResetRouter } from '@/router';
+
+import createPersistedState from 'vuex-persistedstate';
+
+export default createStore({
   state: {
     // 用户信息
     userinfo: {},
 
-    // 用于存储每个ajax请求的取消函数和ajax标识
-    pending: [],
     // 全局字典
     dictionaries: {}
   },
   getters: {
-    // 用户信息
+    // 用户token
     token: (state) => state.userinfo.token,
-    userinfo: state => state.userinfo,
-
-    // 全局请求记录缓存
-    pending: state => state.pending,
-    // 全局字典
-    dictionaries: state => state.dictionaries,
   },
   mutations: {
 
@@ -34,65 +29,20 @@ const store = createStore({
     SET_USERINFO: (state, userinfo) => {
       if (userinfo) {
         state.userinfo = userinfo;
-        localStorage.userinfo = JSON.stringify(userinfo)
       } else {
         //  如果userinfo为空， 则认为是退出登录
         state.userinfo = {};
-        localStorage.removeItem('userinfo')
-        store.commit('permission/SET_ROUTERS', [])
         ResetRouter();
-        router.replace('/Login')
-      }
-    },
-
-    // 存储每个ajax请求的取消函数和ajax标识
-    ADD_PENGDING: (state, pending) => {
-      state.pending.push(pending)
-    },
-    // 删除重复对应的ajax请求的取消函数和ajax标识
-    REMOVE_PENGDING: (state, pending) => {
-      for (let p in state.pending) {
-        if (state.pending[p].u === (pending.url + '&' + pending.method)) { //当当前请求在数组中存在时执行函数体
-          state.pending[p].f({
-            code: 200,
-            url: state.pending[p].u
-          }); //执行取消操作
-          state.pending.splice(p, 1); //把这条记录从数组中移除
-        }
-      }
-    },
-    // 终止所有请求
-    REMOVE_PENGDINGS: (state) => {
-      for (let p in state.pending) {
-        state.pending[p].f({
-          code: 200
-        }); //执行取消操作
-        state.pending.splice(p, 1); //把这条记录从数组中移除
+        router.replace({ name: 'Login', params: { source: '登录' } })
       }
     },
     // 设置全局字典
-    SET_Dictionaries(state, data) {
+    SET_DICTIONARIES(state, data) {
       state.dictionaries = data;
     }
   },
   actions: {
-    // 设置用信息
-    SET_USERINFO: ({
-      commit
-    }, userinfo) => {
-      return new Promise((resolve) => {
-        commit('SET_USERINFO', userinfo)
-        resolve();
-      })
-    },
-    // 设置全局字典
-    SET_Dictionaries({ commit }, data) {
-      return new Promise((resolve, reject) => {
-        commit('SET_Dictionaries', data);
-        resolve();
-      })
-    }
   },
-  modules
+  modules,
+  plugins: [createPersistedState()]
 })
-export default store;
