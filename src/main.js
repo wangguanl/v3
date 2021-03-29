@@ -13,11 +13,11 @@ import '@/router/routerEach'
 import '@/assets/css/index.scss';
 
 /* 组件库 */
-/* import elementPlus from '@/basics/element-plus'
-elementPlus(app) */
+import elementPlus from '@/basics/element-plus'
+elementPlus(app)
 
 
-import ElementPlus from 'element-plus';
-import 'element-plus/lib/theme-chalk/index.css';
-
-app.use(ElementPlus).use(store).use(router).mount('#app')
+/* import ElementPlus from 'element-plus';
+import 'element-plus/lib/theme-chalk/index.css'; 
+app.use(ElementPlus)*/
+app.use(store).use(router).mount('#app')

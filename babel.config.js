@@ -2,18 +2,16 @@ module.exports = {
   presets: [
     '@vue/cli-plugin-babel/preset'
   ],
-  "plugins": [
+  plugins: [
     [
-      "component",
+      "import",
       {
-        "libraryName": "element-plus",
-        "styleLibraryName": "theme-chalk"
-      }
+        libraryName: 'element-plus',
+        customStyleName: (name) => {
+          name = name.slice(3)
+          return `element-plus/packages/theme-chalk/src/${name}.scss`;
+        },
+      },
     ],
-    /* ["import", {
-      "libraryName": "ant-design-vue",
-      "libraryDirectory": "es",
-      "style": 'css',  // `style: true` 会加载 less 文件
-    }], */
   ]
 }

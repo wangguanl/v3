@@ -1,4 +1,7 @@
-// 换行
+%red {
+    font-size: 200px;
+    color: red;
+} // 换行
 %pre {
     white-space: pre-wrap;
     word-break: break-all;
@@ -9,10 +12,12 @@
 }
 
 // 清除浮动
-%clearfix:after {
-    content: "";
-    display: table;
-    clear: both;
+%clearfix {
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
 }
 
 // 单行省略

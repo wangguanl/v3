@@ -1,7 +1,7 @@
 <template>
   <el-container ref="container" class="wrap">
-    <el-aside width="auto" style="background-color: #304156; overflow: hidden">
-      <el-scrollbar :native="false" style="height: 100%; overflow: hidden">
+    <el-aside :width="isCollapse ? '65px' : '200px'">
+      <el-scrollbar :native="false">
         <el-menu
           class="el-menu-vertical-demo"
           :collapse="isCollapse"
@@ -21,7 +21,7 @@
     </el-aside>
     <el-container class="container">
       <el-header class="header">
-        <div class="_flex _flex-items-center">
+        <div class="breadcrumb">
           <i
             :class="[
               isCollapse ? 'el-icon-s-fold' : 'el-icon-s-unfold',
@@ -30,31 +30,28 @@
             @click="isCollapse = !isCollapse"
             class="pointer"
             style="font-size: 16px"
-          ></i>
-          <el-breadcrumb class="app-breadcrumb" separator="/">
-            <transition-group name="breadcrumb">
-              <el-breadcrumb-item
-                v-for="(item, index) in levelList"
-                :key="item.path"
+          />
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item
+              v-for="(item, index) in levelList"
+              :key="item.path"
+            >
+              <span
+                v-if="
+                  item.redirect === 'noredirect' ||
+                  index == levelList.length - 1
+                "
+                class="no-redirect"
+                >{{ item.meta.title }}</span
               >
-                <span
-                  v-if="
-                    item.redirect === 'noredirect' ||
-                    index == levelList.length - 1
-                  "
-                  class="no-redirect"
-                  >{{ item.meta.title }}</span
-                >
-                <router-link v-else :to="item.redirect || item.path">{{
-                  item.meta.title
-                }}</router-link>
-              </el-breadcrumb-item>
-            </transition-group>
+              <router-link v-else :to="item.redirect || item.path">{{
+                item.meta.title
+              }}</router-link>
+            </el-breadcrumb-item>
           </el-breadcrumb>
         </div>
-        <div></div>
-        <el-dropdown class="_pointer" trigger="click">
-          <span class="el-dropdown-link">
+        <el-dropdown trigger="click">
+          <span class="pointer">
             <!-- <img src="@/assets/images/face.png" style="height: 40px" /> -->
             <span style="margin-left: 10px">admin</span>
             <i class="el-icon-arrow-down el-icon--right"></i>
@@ -121,48 +118,56 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.app-breadcrumb.el-breadcrumb {
-  display: inline-block;
-  font-size: 14px;
-  line-height: 50px;
-  margin-left: 10px;
-  .no-redirect {
-    color: #97a8be;
-    cursor: text;
-  }
-}
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 200px;
-  border-right: none;
-}
-
-.el-scrollbar {
-  :deep(.el-scrollbar__wrap) {
-    overflow-x: hidden;
-  }
-}
 .wrap {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  @at-root .aside {
-    height: 100%;
-    background: #fff;
-    box-shadow: 0 0 5px #ccc;
-    padding-top: 50px;
+  @at-root .el-aside {
+    background-color: #304156;
+    overflow: hidden;
+    transition: width 0.3s linear;
+    .el-scrollbar {
+      height: 100%;
+      overflow: hidden;
+      :deep(.el-scrollbar__wrap) {
+        overflow-x: hidden;
+      }
+    }
+
+    .el-menu-vertical-demo {
+      &:not(.el-menu--collapse) {
+        width: 200px;
+      }
+      &,
+      .el-menu--collapse {
+        border-right: none;
+      }
+    }
   }
 
-  & > .container {
+  @at-root .container {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    @at-root .header {
+    & > .header {
       width: 100%;
       box-shadow: 0 1px 2px #ebeeef;
-      // background: linear-gradient(90deg, #02cab0, #28d3ee);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        .el-breadcrumb {
+          font-size: 14px;
+          line-height: 50px;
+          margin-left: 10px;
+          .no-redirect {
+            color: #97a8be;
+            cursor: text;
+          }
+        }
+      }
     }
     & > .main {
       height: 100%;
@@ -172,10 +177,8 @@ export default {
     }
   }
 }
-.layout-container {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
+.pointer {
+  @extend %pointer;
 }
 /* 为对应的路由跳转时设置动画效果 */
 .fade-enter-active,
