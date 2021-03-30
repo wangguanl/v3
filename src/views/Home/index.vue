@@ -115,7 +115,7 @@ export default {
     return () =>
       h(
         // <Suspense>
-        <div className="Wrap">
+        <div className="wrap">
           <Forms
             options={searchOptions}
             vModel={State.SEARCHBAR}
@@ -244,7 +244,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.Wrap {
+.wrap {
   height: 100%;
   width: 100%;
   display: flex;
@@ -266,30 +266,30 @@ export default {
     justify-content: flex-end;
     align-items: center;
   }
-  & > .el-overlay {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+}
+:deep .el-overlay {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5vh 0;
+  box-sizing: border-box;
+  .el-dialog {
+    margin: unset;
+    // height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 5vh 0;
-    box-sizing: border-box;
-    .el-dialog {
-      margin: unset;
-      // height: 100%;
-      display: flex;
-      flex-direction: column;
+    flex-direction: column;
+    overflow: hidden;
+    .el-dialog__header {
+      flex-shrink: 0;
+      cursor: move;
+    }
+    .el-dialog__body {
+      height: 100%;
+      flex: 1;
       overflow: hidden;
-      .el-dialog__header {
-        flex-shrink: 0;
-        cursor: move;
-      }
-      .el-dialog__body {
-        height: 100%;
-        flex: 1;
-        overflow: hidden;
-      }
     }
   }
 }
