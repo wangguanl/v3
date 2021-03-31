@@ -1,6 +1,7 @@
 import {
   createRouter,
-  createWebHistory
+  // createWebHistory,
+  createWebHashHistory
 } from 'vue-router'
 
 import { CancelTokenPendings } from '@/basics/request'
@@ -13,7 +14,7 @@ import {
 } from './routes'
 
 const CreateRouter = () => createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(process.env.BASE_URL),
   scrollBehavior: (to, from, savePosition) => (savePosition ? savePosition : {
     top: 0
   }),
