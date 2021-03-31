@@ -83,6 +83,7 @@
 
 <script>
 import { mapMutations } from "vuex";
+import { USERINFO } from "@/store/types";
 import { defineAsyncComponent } from "vue";
 export default {
   data() {
@@ -92,9 +93,9 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["SET_USERINFO"]),
+    ...mapMutations([USERINFO.mutations]),
     onLogout() {
-      this.SET_USERINFO();
+      this[USERINFO.mutations]();
     },
   },
   computed: {

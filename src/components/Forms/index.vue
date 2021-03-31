@@ -1,6 +1,7 @@
 <script>
 import { resolveComponent, h, computed } from "vue";
 import { useStore } from "vuex";
+import { DICTIONARIES } from "@/store/types";
 export default {
   name: "Forms",
   inheritAttrs: false,
@@ -27,7 +28,7 @@ export default {
   emits: ["update:modelValue"],
   setup(props, { emit, slots, attrs }) {
     const Store = useStore();
-    const Dictionaries = computed(() => Store.state.dictionaries);
+    const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
     /*
      * key => 键
      * val => 值

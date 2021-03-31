@@ -10,35 +10,32 @@ import { createStore } from 'vuex'
 import router, { ResetRouter } from '@/router';
 
 import createPersistedState from 'vuex-persistedstate';
+import { USERINFO, DICTIONARIES } from './types';
 
 export default createStore({
   state: {
-    // 用户信息
-    userinfo: {},
-
-    // 全局字典
-    dictionaries: {}
+    [USERINFO.state]: {}, // 用户信息
+    [DICTIONARIES.state]: {}, // 全局字典
   },
   getters: {
     // 用户token
-    token: (state) => state.userinfo.token,
+    token: (state) => state[USERINFO.state].token,
   },
   mutations: {
-
     // 设置用户信息
-    SET_USERINFO: (state, userinfo) => {
-      if (userinfo) {
-        state.userinfo = userinfo;
+    [USERINFO.mutations](state, data) {
+      if (data) {
+        state[USERINFO.state] = data;
       } else {
-        //  如果userinfo为空， 则认为是退出登录
-        state.userinfo = {};
+        //  如果data为空， 则认为是退出登录
+        state[USERINFO.state] = {};
         ResetRouter();
         router.replace({ name: 'Login', params: { source: '登录' } })
       }
     },
     // 设置全局字典
-    SET_DICTIONARIES(state, data) {
-      state.dictionaries = data;
+    [DICTIONARIES.mutations](state, data) {
+      state[DICTIONARIES.state] = data;
     }
   },
   actions: {

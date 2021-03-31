@@ -10,6 +10,7 @@ import hookDrag from "./hooks/drag";
 import utilDrag from "./utils/drag";
 
 import { useStore } from "vuex";
+import { DICTIONARIES } from "@/store/types";
 
 import {
   Teleport,
@@ -78,7 +79,8 @@ export default {
         return new Promise(async (resolve, reject) => {
           const Store = useStore();
           const data = await FetchPostDictionaries();
-          await Store.commit("SET_DICTIONARIES", data);
+          await Store.commit(DICTIONARIES.mutations, data);
+
           resolve();
         });
       },
