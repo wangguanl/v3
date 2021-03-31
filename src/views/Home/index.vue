@@ -89,9 +89,7 @@ export default {
         State.LOADING = true;
         const { name, qq, gender } = State.SEARCHBAR;
         const { currentPage, pageSize } = State.PAGINATION;
-        FetchPostTableData({
-          data: { name, qq, gender, currentPage, pageSize },
-        })
+        FetchPostTableData({ name, qq, gender, currentPage, pageSize })
           .then(({ data, total }) => {
             State.TABLE = data.map((item) => {
               item.genderName = ["女", "男"][item.gender];

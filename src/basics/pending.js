@@ -1,3 +1,11 @@
+/* 
+    存储请求接口的 CancelToken (用于终止接口的请求)
+    @pending
+    { 
+        u: (config.url + '&' + config.method),  以 url 拼接为标识
+        f: () => {}, CancelToken 函数
+    }
+*/
 export default class CancelTokenPending {
     constructor() {
         // 用于存储每个ajax请求的取消函数和ajax标识

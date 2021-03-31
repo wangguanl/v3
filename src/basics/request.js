@@ -23,22 +23,23 @@ export const CancelTokenPendings = new CancelTokenPending();
 
 // 拦截器设置全局请求参数
 instance.interceptors.request.use(config => {
-    const pending = { u: (config.url + '&' + config.method), f: () => { } }
-    // 终止重复请求
+    const { url, method, headers, params, data } = config;
+    const pending = { u: (url + '&' + method), f: () => { } }
+    // 终止重复的请求接口
     CancelTokenPendings.REMOVE_PENGDING(pending);
     config.cancelToken = new CancelToken((c) => {
         // 标识是用请求地址&请求方式拼接的字符串
         CancelTokenPendings.ADD_PENGDING({ ...pending, f: c })
     });
     // 上传文件
-    if (config.headers['Content-Type'] === "multipart/form-data") {
+    if (headers['Content-Type'] === "multipart/form-data") {
         return config;
     }
     // 处理数据
-    if (config.method === 'get') {
-        config.url = config.url + ('?' + (encodeURIComponentData(config.params).slice(0, -1)))
-    } else if (config.method === 'post') {
-        config.data = config.data ? JSON.stringify(config.data.data) : {}
+    if (method === 'get') {
+        config.url = url + ('?' + (encodeURIComponentData(params).slice(0, -1)))
+    } else if (method === 'post') {
+        config.data = data ? JSON.stringify(data) : {}
     }
 
     return config;
