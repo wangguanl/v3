@@ -1,5 +1,5 @@
 /* export const baseURL = location.protocol + '//' + location.hostname + ':3000/back/' */
-import Pending from './pending'
+import CancelTokenPending from './pending'
 import axios from 'axios';
 
 import {
@@ -19,15 +19,16 @@ let instance = axios.create({
 });
 /* 终止重复请求 */
 const CancelToken = axios.CancelToken;
-export const PD = new Pending();
+export const CancelTokenPendings = new CancelTokenPending();
 
 // 拦截器设置全局请求参数
 instance.interceptors.request.use(config => {
+    const pending = { u: (config.url + '&' + config.method), f: () => { } }
     // 终止重复请求
-    PD.REMOVE_PENGDING(config);
+    CancelTokenPendings.REMOVE_PENGDING(pending);
     config.cancelToken = new CancelToken((c) => {
         // 标识是用请求地址&请求方式拼接的字符串
-        PD.ADD_PENGDING({ u: (config.url + '&' + config.method), f: c })
+        CancelTokenPendings.ADD_PENGDING({ ...pending, f: c })
     });
     // 上传文件
     if (config.headers['Content-Type'] === "multipart/form-data") {

@@ -1,33 +1,34 @@
-export default class Pending {
+export default class CancelTokenPending {
     constructor() {
         // 用于存储每个ajax请求的取消函数和ajax标识
-        this.pending = [];
+        this.pendings = [];
     }
 
     // 存储每个ajax请求的取消函数和ajax标识
-    ADD_PENGDING(p) {
-        this.pending.push(p)
+    ADD_PENGDING(pending) {
+        this.pendings.push(pending)
     }
     // 删除重复对应的ajax请求的取消函数和ajax标识
-    REMOVE_PENGDING(pd) {
-        for (let p = this.pending.length - 1; p >= 0; p--) {
-            if (this.pending[p].u === (pd.url + '&' + pd.method)) {
+    REMOVE_PENGDING(pending) {
+        for (let p = this.pendings.length - 1; p >= 0; p--) {
+            if (this.pendings[p].u === pending.u) {
                 // 当前请求在数组中存在时执行函数体
-                this.pending[p].f({
+                this.pendings[p].f({
                     code: 200,
-                    url: this.pending[p].u
+                    url: this.pendings[p].u
                 }); //执行取消操作
-                this.pending.splice(p, 1); //把这条记录从数组中移除
+                this.pendings.splice(p, 1); //把这条记录从数组中移除
             }
         }
     }
     // 终止所有请求
     REMOVE_PENGDINGS() {
-        for (let p = this.pending.length - 1; p >= 0; p--) {
-            this.pending[p].f({
-                code: 200
+        for (let p = this.pendings.length - 1; p >= 0; p--) {
+            this.pendings[p].f({
+                code: 200,
+                url: this.pendings[p].u
             }); //执行取消操作
-            this.pending.splice(p, 1); //把这条记录从数组中移除
+            this.pendings.splice(p, 1); //把这条记录从数组中移除
         }
     }
 }
