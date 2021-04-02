@@ -161,7 +161,6 @@ export default {
             }}
           />
           <Tables
-            className="table"
             v-loading={State.LOADING}
             datas={State.TABLE}
             columns={columnsOptions}
@@ -198,7 +197,6 @@ export default {
             }}
           />
           <el-pagination
-            className="pagination"
             layout="total, sizes, prev, pager, next, jumper"
             page-sizes={[20, 40, 80, 100, 200]}
             page-size={State.PAGINATION.pageSize}
@@ -259,7 +257,7 @@ export default {
     flex: 1;
     overflow: hidden;
   }
-  & > .pagination {
+  & > .el-pagination {
     flex-shrink: 0;
     padding: 10px;
     display: flex;
@@ -267,7 +265,7 @@ export default {
     align-items: center;
   }
 }
-:deep .el-overlay {
+:deep(.el-overlay) {
   height: 100%;
   width: 100%;
   overflow: hidden;
