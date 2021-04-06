@@ -1,25 +1,32 @@
-export default [{
-    type: 'input',
-    label: '姓名',
-    key: 'name',
-    attr: {
-        required: true,
-        rules: [],
+export default [
+    {
+        type: 'input',
+        key: 'name',
+        attrs: {
+            required: true,
+            rules: [],
+        },
+        formItem: {
+            label: '姓名',
+        },
     },
-    item: {
+    {
+        type: 'input',
+        key: 'qq',
+        attrs: {
+        },
+        formItem: {
+            label: 'qq',
+        },
     },
-},
-{
-    type: 'input',
-    label: 'qq',
-    key: 'qq',
-    attr: {
-    },
-}, {
-    type: 'select',
-    label: '性别',
-    key: 'gender',
-    selectOptions: 'gender',
-    attr: {
-    },
-}]
+    {
+        type: 'select',
+        key: 'gender',
+        selectOptions: 'gender',
+        attrs: {
+        },
+        formItem: {
+            label: '性别',
+        },
+    }
+]

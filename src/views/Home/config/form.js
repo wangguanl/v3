@@ -1,50 +1,51 @@
-export default [{
-  type: 'input',
-  label: '姓名',
-  key: 'name',
-  attr: {
+export default [
+  {
+    type: 'input',
+    key: 'name',
+    attrs: {},
+    formItem: {
+      label: '姓名',
+    },
   },
-  item: {
+  {
+    type: 'input',
+    key: 'qq',
+    attrs: {},
+    formItem: {
+      label: 'qq',
+    }
   },
-},
-{
-  type: 'input',
-  label: 'qq',
-  key: 'qq',
-  attr: {
+  {
+    type: 'select',
+    key: 'gender',
+    selectOptions: 'gender',
+    attrs: {},
+    formItem: {
+      label: '性别',
+    }
   },
-}, {
-  type: 'select',
-  label: '性别',
-  key: 'gender',
-  selectOptions: 'gender',
-  attr: {
+  {
+    type: 'date-picker',
+    key: 'date',
+    formItem: {
+      label: '年月日',
+    }
   },
-},
-{
-  type: 'input',
-  key: 'content',
-  label: '内容',
-  attr: {
-    type: "textarea",
-    autosize: { minRows: 4, maxRows: 4 }
+  {
+    type: 'input',
+    key: 'content',
+    attrs: {
+      type: "textarea",
+      autosize: {
+        minRows: 4, maxRows: 4
+      }
+    },
+    formItem: {
+      label: '内容',
+      required: false,
+    }
   },
-}, {
-  type: 'date-picker',
-  label: '年月日',
-  key: 'ruwurq',
-}, {
-  type: 'date-picker',
-  label: '区间',
-  key: 'ruwurq2',
-  attr: {
-    type: 'daterange'
-  },
-}, {
-  type: 'date-picker',
-  label: '月',
-  key: 'ruwurq3',
-  attr: {
-    type: 'month'
-  },
-}]
+].map(item => {
+  item.formItem.required = item.formItem.hasOwnProperty('required') ? item.formItem.required : true;
+  return item
+})

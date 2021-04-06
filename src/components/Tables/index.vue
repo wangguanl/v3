@@ -1,6 +1,6 @@
 <script>
-import { resolveComponent, h } from "vue";
-export default {
+import { defineComponent, resolveComponent, h } from "vue";
+export default defineComponent({
   name: "Tables",
   inheritAttrs: false,
   props: {
@@ -14,7 +14,7 @@ export default {
      * type: img | text
      * key: 键 => prop
      * label: table-column组件label
-     * attr: table-column组件API
+     * attrs: table-column组件API
      */
     columns: {
       type: Array,
@@ -46,30 +46,31 @@ export default {
                   fixed="left"
                   align="center"
                 />
-                {props["columns"].map(({ key, label, type, attr }) =>
-                  h(
-                    resolveComponent("el-table-column"),
-                    {
-                      // "show-overflow-tooltip": true,
-                      ...props["el-table-column"],
-                      label,
-                      ...attr,
-                    },
-                    {
-                      default: ({ row }) => {
-                        if (type === "img") {
-                          return (
-                            <el-image
-                              style="width: 100px; height: 100px"
-                              src={row[key]}
-                              fit="fill"
-                            />
-                          );
-                        }
-                        return row[key];
+                {props["columns"].map(
+                  ({ key, label, type, attrs: columnAttrs }) =>
+                    h(
+                      resolveComponent("el-table-column"),
+                      {
+                        // "show-overflow-tooltip": true,
+                        ...props["el-table-column"],
+                        label,
+                        ...columnAttrs,
                       },
-                    }
-                  )
+                      {
+                        default: ({ row }) => {
+                          if (type === "img") {
+                            return (
+                              <el-image
+                                style="width: 100px; height: 100px"
+                                src={row[key]}
+                                fit="fill"
+                              />
+                            );
+                          }
+                          return row[key];
+                        },
+                      }
+                    )
                 )}
                 {Object.values(slots).map((slot) => slot())}
               </>
@@ -78,5 +79,5 @@ export default {
         />
       );
   },
-};
+});
 </script>

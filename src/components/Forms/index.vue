@@ -1,8 +1,15 @@
 <script>
-import { resolveComponent, h, computed } from "vue";
+import {
+  defineComponent,
+  resolveComponent,
+  h,
+  computed,
+  onMounted,
+  ref,
+} from "vue";
 import { useStore } from "vuex";
 import { DICTIONARIES } from "@/store/types";
-export default {
+export default defineComponent({
   name: "Forms",
   inheritAttrs: false,
   props: {
@@ -12,20 +19,21 @@ export default {
       * 渲染格式（数据模型）
       * {
          * type: 'input',  <String> el-[type] 元素类型
-         * label: '姓名',  <String> 表单label
          * key: 'xingming',  <String> 表单key
          * selectOptions: '', <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
          * 参考组件库的api
-         * attr: {}, <Object> el-[type]元素的attrs
-         * item: {}, <Object> el-form-item的attrs
+         * attrs: {}, <Object> el-[type]元素的attrs
+         * formItem: {
+            label: '姓名',  <String> 表单 label
+         * }, <Object> el-form-item 的 attrs
         }
      */
     options: { type: Array, default: () => [] },
 
     // 参考 el-form-item 组件库的api
-    "el-form-item": Object,
+    elFormItem: Object,
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "validate"],
   setup(props, { emit, slots, attrs }) {
     const Store = useStore();
     const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
@@ -83,7 +91,7 @@ export default {
             onClear: () => onClear(key),
           },
         ],
-        "date-picker": ({ label, key, attr = {} }) => {
+        "date-picker": ({ key, formItem = {}, attrs: elTypeAttrs = {} }) => {
           const Types = {
             date: {
               shortcuts: [
@@ -95,8 +103,8 @@ export default {
             },
             daterange: {
               "range-separator": "-",
-              "start-placeholder": label + "开始日期",
-              "end-placeholder": label + "结束日期",
+              "start-placeholder": formItem.label + "开始日期",
+              "end-placeholder": formItem.label + "结束日期",
               shortcuts: [
                 {
                   text: "最近一周",
@@ -131,46 +139,78 @@ export default {
           };
           return [
             {
-              ...Types[attr["type"] || "date"],
+              ...Types[elTypeAttrs["type"] || "date"],
               onChange: (val) => onUpdate(key, val, true),
             },
           ];
         },
       };
       return (option) => {
-        const { type, label, key, attr } = option;
+        const { type, key, formItem = {}, attrs: elTypeAttrs } = option;
         const [Attrs, Slots] = config[type](option);
 
         return h(
           resolveComponent("el-" + type),
           {
             modelValue: props["modelValue"][key],
-            placeholder: "请" + (type === "input" ? "输入" : "选择") + label,
+            placeholder:
+              "请" + (type === "input" ? "输入" : "选择") + formItem.label,
             ...Attrs,
-            ...attr,
+            ...elTypeAttrs,
           },
           Slots
         );
       };
     })();
 
+    const rules = (() => {
+      // 集成表单的rules
+      const Rules = attrs["rules"] || [];
+      // 将option展开并去除null、undefined等空值
+      const Options = props["options"].flat().filter((option) => {
+        if (option && !Rules[option.key]) {
+          Rules[option.key] = [];
+        }
+        return option;
+      });
+
+      // 统一集成 el-form-item 组件的 rules 与 required 的校验规则对象
+      Options.forEach(({ type, key, formItem = {} }) => {
+        const { required, label, rules = [] } = formItem;
+        Rules[key].concat(rules);
+        required &&
+          Rules[key].unshift({
+            required: true,
+            message: `请${type === "input" ? "输入" : "选择"}${label}`,
+            trigger: type === "input" ? "blur" : "change",
+          });
+      });
+      return Rules;
+    })();
+
+    const elFormRef = ref(null);
+    onMounted(() => {
+      emit("validate", elFormRef.value);
+    });
+
     return () =>
       h(
         <el-form
+          ref={elFormRef}
           {...attrs}
+          model={props["modelValue"]}
+          rules={rules}
           v-slots={{
             default: () => (
               <>
                 {props["options"].map((option) => {
-                  const { key, label, item } = option;
+                  const { key, formItem } = option;
                   return (
                     <el-form-item
                       key={key}
                       prop={key}
-                      style={attrs["inline"] ? "margin-bottom: 10px" : ""}
-                      {...props["el-form-item"]}
-                      {...item}
-                      label={attrs["inline"] ? "" : label}
+                      {...props["elFormItem"]}
+                      {...formItem}
                     >
                       {generateVNode(option)}
                     </el-form-item>
@@ -183,5 +223,5 @@ export default {
         />
       );
   },
-};
+});
 </script>

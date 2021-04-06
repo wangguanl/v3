@@ -29,9 +29,6 @@ export default {
     Forms: defineAsyncComponent(() =>
       import(/*webpackChunkName: "Forms"*/ "@/components/Forms")
     ),
-    CForms: defineAsyncComponent(() =>
-      import(/*webpackChunkName: "CForms"*/ "@/components/CForms")
-    ),
   },
   directives: {
     // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案
@@ -49,11 +46,14 @@ export default {
   setup() {
     // 响应式数据
     const State = reactive({
-      LOADING: false,
-
+      LOADINGS: {
+        table: false,
+        submit: false,
+      },
       SEARCHBAR: {}, // 搜索条件
 
       TABLE: [], // 表格数据
+      SELECTIONS: [], // 选中的表格数据
       // 分页
       PAGINATION: {
         total: 0,
@@ -86,7 +86,7 @@ export default {
       },
       // 获取表格数据
       FetchPostTableData: () => {
-        State.LOADING = true;
+        State.LOADINGS.table = true;
         const { name, qq, gender } = State.SEARCHBAR;
         const { currentPage, pageSize } = State.PAGINATION;
         FetchPostTableData({ name, qq, gender, currentPage, pageSize })
@@ -97,7 +97,7 @@ export default {
             });
             State.PAGINATION.total = total;
           })
-          .finally(() => (State.LOADING = false));
+          .finally(() => (State.LOADINGS.table = false));
       },
     };
 
@@ -107,6 +107,7 @@ export default {
 
     // 设置dialog
     const dialogRef = ref(null);
+    const dialogFormRef = ref(null);
     // hookDrag(dialogRef);
     onMounted(() => {
       utilDrag(dialogRef.value.dialogRef);
@@ -118,13 +119,12 @@ export default {
         <div className="wrap">
           <Forms
             options={searchOptions}
-            vModel={State.SEARCHBAR}
+            v-model={State.SEARCHBAR}
             inline
-            el-form-item={{ "label-width": "200px" }}
             v-slots={{
               default: () => (
                 <>
-                  <el-form-item style="margin-bottom: 10px">
+                  <el-form-item>
                     <el-button
                       type="primary"
                       onClick={() => {
@@ -136,7 +136,7 @@ export default {
                     </el-button>
                   </el-form-item>
 
-                  <el-form-item style="margin-bottom: 10px;float: right;">
+                  <el-form-item style="float: right;">
                     <el-button
                       type="primary"
                       onClick={() => {
@@ -150,7 +150,7 @@ export default {
                     <el-button
                       type="danger"
                       onClick={() => {
-                        console.log("批量删除");
+                        console.log(State.SELECTIONS);
                       }}
                     >
                       批量删除
@@ -161,10 +161,12 @@ export default {
             }}
           />
           <Tables
-            v-loading={State.LOADING}
+            v-loading={State.LOADINGS.table}
             datas={State.TABLE}
             columns={columnsOptions}
-            onSelectionChange={(rows) => console.log(rows)}
+            onSelectionChange={(rows) => (
+              console.log(rows), (State.SELECTIONS = [...rows])
+            )}
             type="selection"
             v-slots={{
               default: () => (
@@ -218,16 +220,44 @@ export default {
             v-model={State.DIALOG.modelValue}
             v-slots={{
               default: () => (
-                <CForms
-                  vModel={State.FORM}
+                <Forms
                   options={formOptions}
-                  required
-                  onCancle={() => {
-                    State.DIALOG.modelValue = false;
+                  v-model={State.FORM}
+                  el-form-item={{ size: "medium" }}
+                  label-width="80px"
+                  onValidate={(elFormRef) => {
+                    console.log(elFormRef);
+                    dialogFormRef.value = elFormRef;
                   }}
-                  onSubmit={() => {
-                    State.DIALOG.modelValue = false;
-                    console.log(State.FORM);
+                  v-slots={{
+                    default: () => (
+                      <el-form-item>
+                        <el-button
+                          loading={State.LOADINGS.submit}
+                          type="primary"
+                          onClick={() => {
+                            State.LOADINGS.submit = true;
+                            dialogFormRef.value.validate((valid) => {
+                              if (valid) {
+                                State.DIALOG.modelValue = false;
+                              }
+                              setTimeout(() => {
+                                State.LOADINGS.submit = false;
+                              }, 3000);
+                            });
+                          }}
+                        >
+                          保存
+                        </el-button>
+                        <el-button
+                          onClick={() => {
+                            State.DIALOG.modelValue = false;
+                          }}
+                        >
+                          取消
+                        </el-button>
+                      </el-form-item>
+                    ),
                   }}
                 />
               ),
@@ -252,6 +282,9 @@ export default {
     flex-shrink: 0;
     padding: 10px;
     padding-bottom: 0;
+    :deep(.el-form-item) {
+      margin-bottom: 10px;
+    }
   }
   & > .el-table {
     flex: 1;
@@ -276,18 +309,19 @@ export default {
   box-sizing: border-box;
   .el-dialog {
     margin: unset;
-    // height: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding: 10px;
     .el-dialog__header {
       flex-shrink: 0;
       cursor: move;
     }
     .el-dialog__body {
-      height: 100%;
+      padding: 20px;
       flex: 1;
-      overflow: hidden;
+      overflow: auto;
     }
   }
 }
