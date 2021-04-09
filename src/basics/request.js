@@ -37,7 +37,7 @@ instance.interceptors.request.use(config => {
     }
     // 处理数据
     if (method === 'get') {
-        config.url = url + ('?' + (encodeURIComponentData(params).slice(0, -1)))
+        config.url = url + ('?' + (stringifyQuery(params).slice(0, -1)))
     } else if (method === 'post') {
         config.data = data ? JSON.stringify(data) : {}
     }
@@ -70,7 +70,8 @@ instance.interceptors.response.use(({ data }) => {
     }
 });
 
-function encodeURIComponentData(data) {
+// 将对象解析为url ?a=1&b=2&c=3&b=4
+function stringifyQuery(data) {
 
     let urlStr = '';
     for (let k in data) {

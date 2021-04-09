@@ -4,7 +4,7 @@ module.exports = {
     // publicPath: './', // 相对路径
     productionSourceMap: false,
     devServer: {
-        before: require('./mock')
+        before: require('./src/mock')
     },
     css: {
         loaderOptions: {

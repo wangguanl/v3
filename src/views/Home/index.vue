@@ -45,7 +45,7 @@ export default {
   },
   setup() {
     // 响应式数据
-    const State = reactive({
+    const STATE = reactive({
       LOADINGS: {
         table: false,
         submit: false,
@@ -70,10 +70,10 @@ export default {
       FORM: {},
     });
     // 操作事件函数
-    const Handles = {};
+    const HANDLES = {};
 
     // 方法
-    const Methods = {
+    const METHDOS = {
       // 获取字典集
       FetchPostDictionaries: () => {
         return new Promise(async (resolve, reject) => {
@@ -86,23 +86,23 @@ export default {
       },
       // 获取表格数据
       FetchPostTableData: () => {
-        State.LOADINGS.table = true;
-        const { name, qq, gender } = State.SEARCHBAR;
-        const { currentPage, pageSize } = State.PAGINATION;
+        STATE["LOADINGS"].table = true;
+        const { name, qq, gender } = STATE["SEARCHBAR"];
+        const { currentPage, pageSize } = STATE["PAGINATION"];
         FetchPostTableData({ name, qq, gender, currentPage, pageSize })
           .then(({ data, total }) => {
-            State.TABLE = data.map((item) => {
+            STATE["TABLE"] = data.map((item) => {
               item.genderName = ["女", "男"][item.gender];
               return item;
             });
-            State.PAGINATION.total = total;
+            STATE["PAGINATION"].total = total;
           })
-          .finally(() => (State.LOADINGS.table = false));
+          .finally(() => (STATE["LOADINGS"].table = false));
       },
     };
 
-    Methods.FetchPostDictionaries().then(() => {
-      Methods.FetchPostTableData();
+    METHDOS.FetchPostDictionaries().then(() => {
+      METHDOS.FetchPostTableData();
     });
 
     // 设置dialog
@@ -119,7 +119,7 @@ export default {
         <div className="wrap">
           <Forms
             options={searchOptions}
-            v-model={State.SEARCHBAR}
+            v-model={STATE["SEARCHBAR"]}
             inline
             v-slots={{
               default: () => (
@@ -128,8 +128,8 @@ export default {
                     <el-button
                       type="primary"
                       onClick={() => {
-                        State.PAGINATION.currentPage = 1;
-                        Methods.FetchPostTableData();
+                        STATE["PAGINATION"].currentPage = 1;
+                        METHDOS.FetchPostTableData();
                       }}
                     >
                       搜索
@@ -140,9 +140,9 @@ export default {
                     <el-button
                       type="primary"
                       onClick={() => {
-                        State.FORM = {};
-                        State.DIALOG.modelValue = true;
-                        State.DIALOG.title = "新增";
+                        STATE["FORM"] = {};
+                        STATE["DIALOG"].modelValue = true;
+                        STATE["DIALOG"].title = "新增";
                       }}
                     >
                       新增
@@ -150,7 +150,7 @@ export default {
                     <el-button
                       type="danger"
                       onClick={() => {
-                        console.log(State.SELECTIONS);
+                        console.log(STATE["SELECTIONS"]);
                       }}
                     >
                       批量删除
@@ -161,11 +161,11 @@ export default {
             }}
           />
           <Tables
-            v-loading={State.LOADINGS.table}
-            datas={State.TABLE}
+            v-loading={STATE["LOADINGS"].table}
+            datas={STATE["TABLE"]}
             columns={columnsOptions}
             onSelectionChange={(rows) => (
-              console.log(rows), (State.SELECTIONS = [...rows])
+              console.log(rows), (STATE["SELECTIONS"] = [...rows])
             )}
             type="selection"
             v-slots={{
@@ -181,9 +181,9 @@ export default {
                         <el-button
                           onClick={() => {
                             console.log(row);
-                            State.DIALOG.modelValue = true;
-                            State.DIALOG.title = "编辑";
-                            State.FORM = { ...row };
+                            STATE["DIALOG"].modelValue = true;
+                            STATE["DIALOG"].title = "编辑";
+                            STATE["FORM"] = { ...row };
                           }}
                         >
                           编辑
@@ -201,28 +201,28 @@ export default {
           <el-pagination
             layout="total, sizes, prev, pager, next, jumper"
             page-sizes={[20, 40, 80, 100, 200]}
-            page-size={State.PAGINATION.pageSize}
-            current-page={State.PAGINATION.currentPage}
-            total={State.PAGINATION.total}
+            page-size={STATE["PAGINATION"].pageSize}
+            current-page={STATE["PAGINATION"].currentPage}
+            total={STATE["PAGINATION"].total}
             onSizeChange={(pageSize) => {
-              State.PAGINATION.pageSize = pageSize;
-              State.PAGINATION.currentPage = 1;
-              Methods.FetchPostTableData();
+              STATE["PAGINATION"].pageSize = pageSize;
+              STATE["PAGINATION"].currentPage = 1;
+              METHDOS.FetchPostTableData();
             }}
             onCurrentChange={(currentPage) => {
-              State.PAGINATION.currentPage = currentPage;
-              Methods.FetchPostTableData();
+              STATE["PAGINATION"].currentPage = currentPage;
+              METHDOS.FetchPostTableData();
             }}
           />
           <el-dialog
             ref={dialogRef}
-            {...State.DIALOG}
-            v-model={State.DIALOG.modelValue}
+            {...STATE["DIALOG"]}
+            v-model={STATE["DIALOG"].modelValue}
             v-slots={{
               default: () => (
                 <Forms
                   options={formOptions}
-                  v-model={State.FORM}
+                  v-model={STATE["FORM"]}
                   el-form-item={{ size: "medium" }}
                   label-width="80px"
                   onValidate={(elFormRef) => {
@@ -233,16 +233,16 @@ export default {
                     default: () => (
                       <el-form-item>
                         <el-button
-                          loading={State.LOADINGS.submit}
+                          loading={STATE["LOADINGS"].submit}
                           type="primary"
                           onClick={() => {
-                            State.LOADINGS.submit = true;
+                            STATE["LOADINGS"].submit = true;
                             dialogFormRef.value.validate((valid) => {
                               if (valid) {
-                                State.DIALOG.modelValue = false;
+                                STATE["DIALOG"].modelValue = false;
                               }
                               setTimeout(() => {
-                                State.LOADINGS.submit = false;
+                                STATE["LOADINGS"].submit = false;
                               }, 3000);
                             });
                           }}
@@ -251,7 +251,7 @@ export default {
                         </el-button>
                         <el-button
                           onClick={() => {
-                            State.DIALOG.modelValue = false;
+                            STATE["DIALOG"].modelValue = false;
                           }}
                         >
                           取消

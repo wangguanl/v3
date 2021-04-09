@@ -9,5 +9,4 @@ const app = createApp(App);
 
 /* 组件库 */
 import elementPlus from '@/basics/element-plus'
-elementPlus(app)
-app.use(store).use(router).mount('#app')
+app.use(store).use(router).use(elementPlus).mount('#app')
