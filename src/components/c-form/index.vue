@@ -10,7 +10,7 @@ import {
 import { useStore } from "vuex";
 import { DICTIONARIES } from "@/store/types";
 export default defineComponent({
-  name: "Forms",
+  name: "c-form",
   inheritAttrs: false,
   props: {
     modelValue: { type: Object, default: () => ({}) }, // 双向数据绑定

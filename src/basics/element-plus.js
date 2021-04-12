@@ -33,10 +33,10 @@ import {
     ElTooltip,
     ElTransfer,
     ElTree,
-    ElInfiniteScroll,
-    ElMessage,
+    ElInfiniteScroll,*/
     ElMessageBox,
-    ElNotification, */
+    ElMessage,
+    ElNotification,
     ElAutocomplete,
     ElAvatar,
     ElBacktop,
@@ -118,11 +118,7 @@ const components = [
     ElTimelineItem,
     ElTooltip,
     ElTransfer,
-    ElTree,
-    ElInfiniteScroll,
-    ElMessage,
-    ElMessageBox,
-    ElNotification, */
+    ElTree,*/
     ElAutocomplete,
     ElAvatar,
     ElBacktop,
@@ -167,20 +163,24 @@ const components = [
     ElSubmenu,
     ElTable,
     ElTableColumn,
-    ElLoading,
 ]
 
 const plugins = [
-    /* ElInfiniteScroll,
-    ElLoading,
-    ElMessage,
+    /* ElInfiniteScroll, */
     ElMessageBox,
-    ElNotification, */
+    ElMessage,
+    ElNotification,
     ElLoading,
 ]
 export default {
     install(app, options = {}) {
         components.forEach(component => app.component(component.name, component))
-        plugins.forEach(plugin => app.use(plugin))
+        plugins.forEach(plugin => {
+            app.use(plugin);
+            if (plugin.name) {
+                app.config.globalProperties[plugin.name] = plugin;
+            }
+        })
+
     }
 }

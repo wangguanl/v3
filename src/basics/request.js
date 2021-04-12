@@ -1,4 +1,8 @@
 /* export const baseURL = location.protocol + '//' + location.hostname + ':3000/back/' */
+export const ip = 'http://localhost:9999/'
+export const baseURL = '/'
+export const uploadURL = 'http://localhost:9999/upload'
+
 import CancelTokenPending from './pending'
 import axios from 'axios';
 
@@ -9,7 +13,7 @@ import {
     axios请求配置
  */
 let instance = axios.create({
-    baseURL: '/',
+    baseURL,
     timeout: 60000,
     headers: {
         'Content-Type': 'application/json;charset=utf-8',

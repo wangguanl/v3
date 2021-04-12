@@ -1,7 +1,7 @@
 <script>
 import { defineComponent, resolveComponent, h } from "vue";
 export default defineComponent({
-  name: "Tables",
+  name: "c-table",
   inheritAttrs: false,
   props: {
     // 数据

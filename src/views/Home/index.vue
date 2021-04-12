@@ -23,11 +23,14 @@ import {
 } from "vue";
 export default {
   components: {
-    Tables: defineAsyncComponent(() =>
-      import(/*webpackChunkName: "Tables"*/ "@/components/Tables")
+    // "c-upload": defineAsyncComponent(() =>
+    //   import(/*webpackChunkName: "c-upload"*/ "@/components/c-upload")
+    // ),
+    "c-table": defineAsyncComponent(() =>
+      import(/*webpackChunkName: "c-table"*/ "@/components/c-table")
     ),
-    Forms: defineAsyncComponent(() =>
-      import(/*webpackChunkName: "Forms"*/ "@/components/Forms")
+    "c-form": defineAsyncComponent(() =>
+      import(/*webpackChunkName: "c-form"*/ "@/components/c-form")
     ),
   },
   directives: {
@@ -61,13 +64,22 @@ export default {
         currentPage: 1,
       },
       DIALOG: {
-        modelValue: false,
+        modelValue: true,
         title: "",
         width: "1000px",
         top: "0",
       },
 
-      FORM: {},
+      FORM: {
+        fileList: [
+          {
+            name: "123",
+            status: "success",
+            url:
+              "http://localhost:9999/upload/1618209689963_Y2E2OTY1ZjktNWYyMi00ZDc5LWIxYjctODJhNmUxNWZlZGFh.jpg",
+          },
+        ],
+      },
     });
     // 操作事件函数
     const HANDLES = {};
@@ -117,7 +129,7 @@ export default {
       h(
         // <Suspense>
         <div className="wrap">
-          <Forms
+          <c-form
             options={searchOptions}
             v-model={STATE["SEARCHBAR"]}
             inline
@@ -140,7 +152,9 @@ export default {
                     <el-button
                       type="primary"
                       onClick={() => {
-                        STATE["FORM"] = {};
+                        STATE["FORM"] = {
+                          fileList: [],
+                        };
                         STATE["DIALOG"].modelValue = true;
                         STATE["DIALOG"].title = "新增";
                       }}
@@ -160,7 +174,7 @@ export default {
               ),
             }}
           />
-          <Tables
+          <c-table
             v-loading={STATE["LOADINGS"].table}
             datas={STATE["TABLE"]}
             columns={columnsOptions}
@@ -183,7 +197,7 @@ export default {
                             console.log(row);
                             STATE["DIALOG"].modelValue = true;
                             STATE["DIALOG"].title = "编辑";
-                            STATE["FORM"] = { ...row };
+                            STATE["FORM"] = { fileList: [], ...row };
                           }}
                         >
                           编辑
@@ -220,43 +234,51 @@ export default {
             v-model={STATE["DIALOG"].modelValue}
             v-slots={{
               default: () => (
-                <Forms
+                <c-form
                   options={formOptions}
                   v-model={STATE["FORM"]}
                   el-form-item={{ size: "medium" }}
                   label-width="80px"
                   onValidate={(elFormRef) => {
-                    console.log(elFormRef);
                     dialogFormRef.value = elFormRef;
                   }}
                   v-slots={{
                     default: () => (
-                      <el-form-item>
-                        <el-button
-                          loading={STATE["LOADINGS"].submit}
-                          type="primary"
-                          onClick={() => {
-                            STATE["LOADINGS"].submit = true;
-                            dialogFormRef.value.validate((valid) => {
-                              if (valid) {
-                                STATE["DIALOG"].modelValue = false;
-                              }
-                              setTimeout(() => {
-                                STATE["LOADINGS"].submit = false;
-                              }, 3000);
-                            });
-                          }}
-                        >
-                          保存
-                        </el-button>
-                        <el-button
-                          onClick={() => {
-                            STATE["DIALOG"].modelValue = false;
-                          }}
-                        >
-                          取消
-                        </el-button>
-                      </el-form-item>
+                      <>
+                        <el-form-item label="上传">
+                          <c-upload
+                            v-model={STATE["FORM"].fileList}
+                            limit={1}
+                          />
+                        </el-form-item>
+                        <el-form-item>
+                          <el-button
+                            loading={STATE["LOADINGS"].submit}
+                            type="primary"
+                            onClick={() => {
+                              console.log(STATE.FORM);
+                              /* STATE["LOADINGS"].submit = true;
+                              dialogFormRef.value.validate((valid) => {
+                                if (valid) {
+                                  STATE["DIALOG"].modelValue = false;
+                                }
+                                setTimeout(() => {
+                                  STATE["LOADINGS"].submit = false;
+                                }, 3000);
+                              }); */
+                            }}
+                          >
+                            保存
+                          </el-button>
+                          <el-button
+                            onClick={() => {
+                              STATE["DIALOG"].modelValue = false;
+                            }}
+                          >
+                            取消
+                          </el-button>
+                        </el-form-item>
+                      </>
                     ),
                   }}
                 />
