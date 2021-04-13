@@ -71,14 +71,7 @@ export default {
       },
 
       FORM: {
-        fileList: [
-          {
-            name: "123",
-            status: "success",
-            url:
-              "http://localhost:9999/upload/1618209689963_Y2E2OTY1ZjktNWYyMi00ZDc5LWIxYjctODJhNmUxNWZlZGFh.jpg",
-          },
-        ],
+        fileList: [],
       },
     });
     // 操作事件函数
@@ -120,6 +113,7 @@ export default {
     // 设置dialog
     const dialogRef = ref(null);
     const dialogFormRef = ref(null);
+    const uploadRef = ref(null);
     // hookDrag(dialogRef);
     onMounted(() => {
       utilDrag(dialogRef.value.dialogRef);
@@ -247,8 +241,10 @@ export default {
                       <>
                         <el-form-item label="上传">
                           <c-upload
+                            ref={uploadRef}
                             v-model={STATE["FORM"].fileList}
-                            limit={1}
+                            limit={9}
+                            accept="image/png,image/jpeg"
                           />
                         </el-form-item>
                         <el-form-item>

@@ -11,6 +11,7 @@ import {
   mergeProps,
   h,
   onMounted,
+  Teleport,
 } from "vue";
 import Sortable from "sortablejs";
 import axios, { uploadURL, ip } from "@/basics/request";
@@ -27,28 +28,31 @@ export default defineComponent({
   emits: ["update:modelValue"],
   components: {
     ElImageViewer,
+    Teleport,
   },
-  setup(props, { attrs, slots, emit }) {
+  setup(props, { attrs, emit }) {
     const { ctx } = getCurrentInstance();
     const uploadRef = ref(null);
     const STATE = reactive({
-      preview: {
+      Preview: {
+        initialIndex: 0,
         visible: false,
         list: [],
       },
     });
-    const IMGS = {};
-    let timer = null;
     var MergeAttrs = {};
     const METHODS = {
       // 超出上传数量
       useExceed: () => ctx.Message.warning(`最多可以上传${MergeAttrs.limit}张`),
       // 校验上传文件
-      useBeforeUpload: () => {
+      useBeforeUpload: (() => {
         const TypeSuffix = {
           "image/*": [
+            "pjp",
             "jpg",
             "jpeg",
+            "pjpeg",
+            "jfif",
             "gif",
             "png",
             "bmp",
@@ -56,12 +60,9 @@ export default defineComponent({
             "svgz",
             "xbm",
             "tif",
-            "pjp",
-            "pjpeg",
             "ico",
             "tiff",
             "svg",
-            "jfif",
           ],
           "video/*": [
             "AVI",
@@ -75,30 +76,48 @@ export default defineComponent({
           ],
         };
         return (file) => {
-          let acceptResult;
+          let pass;
           const accept = MergeAttrs.accept ? MergeAttrs.accept.split(",") : [];
-          if (accept.some((val) => val === "*")) {
-            acceptResult = true;
+          if (accept.some((acc) => acc === "*")) {
+            pass = true;
           } else {
             const names = file.name.split(".");
-            // 文件后缀名 jpg pdf doc
             const suffix = names[names.length - 1].toLocaleLowerCase();
-            acceptResult = accept.some((val) => {
-              const typeSuffix = val.toLocaleLowerCase();
-              // 根据已定义类型后缀进行判断
-              return TypeSuffix[typeSuffix]
-                ? TypeSuffix[typeSuffix].some(
-                    (val) => val.toLocaleLowerCase() === suffix
-                  )
-                : "." + suffix === typeSuffix;
-            });
-            if (!acceptResult) {
-              ctx.Message.error("请上传" + accept.toString() + "格式的文件");
+            if (accept.some((acc) => acc === "image/*")) {
+              // 文件后缀名 jpg pdf doc
+              pass = TypeSuffix["image/*"].some(
+                (imgType) => imgType.toLocaleLowerCase() === suffix
+              );
+            } else {
+              pass = accept.some((acc) => {
+                // 文件后缀名 jpg pdf doc
+                const accType = acc.split("/");
+                const accSuffix = accType[
+                  accType.length - 1
+                ].toLocaleLowerCase();
+                if (accSuffix === "jpeg") {
+                  return ["pjp", "jpg", "jpeg", "pjpeg", "jfif"].some(
+                    (v) => v === suffix
+                  );
+                } else {
+                  return accSuffix === suffix;
+                }
+              });
+            }
+            if (!pass) {
+              ctx.Notification.warning({
+                title: "提示",
+                message: `${
+                  file.name
+                } 文件格式错误，请上传 ${accept.toString()} 格式的文件`,
+                duration: 0,
+                dangerouslyUseHTMLString: true,
+              });
             }
           }
-          return acceptResult;
+          return pass;
         };
-      },
+      })(),
       // 删除文件询问
       useBeforeRemove: () =>
         ctx.MessageBox.confirm("是否删除该文件?", "提示", {
@@ -106,111 +125,112 @@ export default defineComponent({
           cancelButtonText: "取消",
           type: "warning",
         }),
-
-      useHttpRequest: (file) => {
-        console.log(file);
-        IMGS[file.file.uid] = file;
-
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          const FileBuffer = new FormData();
-          for (let uid in IMGS) {
-            FileBuffer.append(uid, IMGS[uid].file);
-          }
-          axios
-            .post(uploadURL, FileBuffer, {
-              headers: { "Content-Type": "multipart/form-data" },
-              onUploadProgress: (progressEvent) => {
-                const complete =
-                  ((progressEvent.loaded / progressEvent.total) * 100) | 0;
-                Object.values(IMGS).forEach(({ onProgress }) =>
-                  onProgress({ percent: complete })
-                );
-              },
-            })
-            .then((result) => {
-              console.log(result);
-              for (let uid in result) {
-                let { status, file_name, source_file_url } = result[uid];
-                if (status === "fulfilled") {
-                  // 成功
-                  IMGS[uid].onSuccess();
-                  props["modelValue"].push({
-                    ...result[uid],
-                    uid,
-                    name: file_name,
-                    url: ip + source_file_url,
-                    status: "success",
-                  });
-                } else if (status === "rejected") {
-                  // 失败
-                  ctx.Notification.error({
-                    title: "提示",
-                    message: IMGS[uid].file.name + " 文件上传失败",
-                    duration: 0,
-                  });
-                  IMGS[uid].onError();
+      // 自定义上传
+      useHttpRequest: (() => {
+        let timer = null;
+        let IMGS = {};
+        return (file) => {
+          IMGS[file.file.uid] = file;
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            const FileBuffer = new FormData();
+            for (let uid in IMGS) {
+              FileBuffer.append(uid, IMGS[uid].file);
+            }
+            axios
+              .post(uploadURL, FileBuffer, {
+                headers: { "Content-Type": "multipart/form-data" },
+                onUploadProgress: (progressEvent) => {
+                  const complete =
+                    ((progressEvent.loaded / progressEvent.total) * 100) | 0;
+                  Object.values(IMGS).forEach(({ onProgress }) =>
+                    onProgress({ percent: complete })
+                  );
+                },
+              })
+              .then((result) => {
+                for (let uid in result) {
+                  let { status, file_name, source_file_url } = result[uid];
+                  if (status === "fulfilled") {
+                    // 成功
+                    IMGS[uid].onSuccess(result[uid]);
+                  } else if (status === "rejected") {
+                    // 失败
+                    ctx.Notification.error({
+                      title: "提示",
+                      message: IMGS[uid].file.name + " 文件上传失败",
+                      duration: 0,
+                    });
+                    IMGS[uid].onError();
+                  }
                 }
-                delete IMGS[uid];
-              }
-            });
-          timer = null;
-        }, 1000);
-      },
+                IMGS = {};
+              });
+            timer = null;
+          }, 1000);
+        };
+      })(),
     };
     const HANDLES = {
-      onSubmit: () => uploadRef.value.submit(),
+      onChange: (file, fileList) => {
+        emit("update:modelValue", fileList);
+        METHODS.useBeforeUpload(file);
+      },
+      onSubmit: () => {
+        props["modelValue"]
+          .filter(({ status }) => status !== "success")
+          .every((file) => METHODS.useBeforeUpload(file)) &&
+          uploadRef.value.submit();
+      },
       onRemove: (file, fileList) => {
-        emit(
-          "update:modelValue",
-          fileList.filter(({ status }) => status === "success")
-        );
+        props["modelValue"].splice(props["modelValue"].indexOf(file), 1);
+        fileList = props["modelValue"];
       },
       onPreview(file) {
-        STATE.preview.visible = true;
-        let startIndex = props["modelValue"].indexOf(file);
-        let arr = [...props["modelValue"]];
-        STATE.preview.list = [
-          ...arr.splice(startIndex),
-          ...arr,
-        ].map(({ url }) =>
-          url.startsWith(location.protocol + "//" + location.hostname)
-            ? url
-            : ip + url
-        );
+        STATE.Preview = {
+          initialIndex: props["modelValue"].indexOf(file),
+          visible: true,
+          list: props["modelValue"].map(({ url, name }) =>
+            url.startsWith(location.protocol + "//" + location.hostname) ||
+            url.startsWith(
+              "blob:" + location.protocol + "//" + location.hostname
+            )
+              ? url
+              : ip + url
+          ),
+        };
+        console.log(STATE.Preview);
       },
     };
     onMounted(() => {
       if (uploadRef.value.$el.querySelector(".el-upload-list")) {
         Sortable.create(uploadRef.value.$el.querySelector(".el-upload-list"), {
           onEnd: (evt) => {
-            const tempArr = [...props["modelValue"]];
+            const tempArr = props["modelValue"].slice();
+            console.log(tempArr);
             tempArr.splice(evt.newIndex, 0, tempArr.splice(evt.oldIndex, 1)[0]);
-            emit(
-              "update:modelValue",
-              tempArr.filter((v) => v)
-            );
+            emit("update:modelValue", tempArr);
           },
         });
       }
     });
     MergeAttrs = mergeProps(
       {
-        "list-type": "picture-card",
-        accept: "image/*",
-        "auto-upload": false,
+        action: "",
         multiple: true,
-        limit: 99999,
+        accept: "image/*",
+        "list-type": "picture-card",
+        "auto-upload": false,
         "file-list": props["modelValue"],
         "on-exceed": METHODS.useExceed,
         "http-request": METHODS.useHttpRequest,
         "before-remove": METHODS.useBeforeRemove,
         "on-remove": HANDLES.onRemove,
         "on-preview": HANDLES.onPreview,
+        "on-change": HANDLES.onChange,
       },
       attrs
     );
-    // console.log(MergeAttrs);
     return () =>
       h(
         <>
@@ -222,11 +242,16 @@ export default defineComponent({
             )}
           </el-upload>
           <el-button onClick={HANDLES.onSubmit}>上传</el-button>
-          <el-image-viewer
-            style={{ display: STATE.preview.visible ? "unset" : "none" }}
-            url-list={STATE.preview.list}
-            on-close={() => (STATE.preview.visible = false)}
-          ></el-image-viewer>
+          {STATE.Preview.visible ? (
+            <Teleport to="body">
+              <el-image-viewer
+                z-index={2021}
+                initial-index={STATE.Preview.initialIndex}
+                url-list={STATE.Preview.list}
+                onClose={() => (STATE.Preview.visible = false)}
+              />
+            </Teleport>
+          ) : null}
         </>
       );
   },
