@@ -20,6 +20,7 @@ import {
   defineAsyncComponent,
   onMounted,
   Suspense,
+  getCurrentInstance,
 } from "vue";
 export default {
   components: {
@@ -34,7 +35,7 @@ export default {
     ),
   },
   directives: {
-    // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案
+    // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案, 现在的拖拽有bug
     drag: {
       created() {},
       mounted() {},
@@ -47,6 +48,7 @@ export default {
     minimize: {},
   },
   setup() {
+    const { ctx } = getCurrentInstance();
     // 响应式数据
     const STATE = reactive({
       LOADINGS: {
@@ -106,17 +108,18 @@ export default {
       },
     };
 
-    METHDOS.FetchPostDictionaries().then(() => {
+    // 接口初始化
+    (async () => {
+      await METHDOS.FetchPostDictionaries();
       METHDOS.FetchPostTableData();
-    });
+    })();
 
     // 设置dialog
     const dialogRef = ref(null);
     const dialogFormRef = ref(null);
-    const uploadRef = ref(null);
     // hookDrag(dialogRef);
     onMounted(() => {
-      utilDrag(dialogRef.value.dialogRef);
+      // utilDrag(dialogRef.value.dialogRef);
     });
 
     return () =>
@@ -240,11 +243,19 @@ export default {
                     default: () => (
                       <>
                         <el-form-item label="上传">
-                          <c-upload
-                            ref={uploadRef}
+                          <c-handle-upload-pic
                             v-model={STATE["FORM"].fileList}
-                            limit={9}
-                            accept="image/png,image/jpeg"
+                            limit={3}
+                            accept="image/jpeg,image/png"
+                            onUploadMethods={({ onInit, onSuccess }) => {
+                              HANDLES.onUploadInit = onInit;
+                              HANDLES.onUploadSuccess = onSuccess;
+                            }}
+                            v-slots={{
+                              tip: () => (
+                                <>只能上传 jpg/png 格式文件，且不超过 3 张</>
+                              ),
+                            }}
                           />
                         </el-form-item>
                         <el-form-item>
@@ -252,8 +263,11 @@ export default {
                             loading={STATE["LOADINGS"].submit}
                             type="primary"
                             onClick={() => {
-                              console.log(STATE.FORM);
-                              /* STATE["LOADINGS"].submit = true;
+                              if (HANDLES.onUploadSuccess()) {
+                                ctx.Message.warning("文件正在上传中");
+                                return;
+                              }
+                              STATE["LOADINGS"].submit = true;
                               dialogFormRef.value.validate((valid) => {
                                 if (valid) {
                                   STATE["DIALOG"].modelValue = false;
@@ -261,13 +275,14 @@ export default {
                                 setTimeout(() => {
                                   STATE["LOADINGS"].submit = false;
                                 }, 3000);
-                              }); */
+                              });
                             }}
                           >
                             保存
                           </el-button>
                           <el-button
                             onClick={() => {
+                              HANDLES.onUploadInit();
                               STATE["DIALOG"].modelValue = false;
                             }}
                           >

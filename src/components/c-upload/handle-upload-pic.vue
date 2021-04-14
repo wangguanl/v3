@@ -1,11 +1,8 @@
 <script>
 import { baseURL } from "@/basics/request";
-import generateUUID from "@/utils/unique";
 import {
   defineComponent,
   reactive,
-  toRefs,
-  computed,
   ref,
   getCurrentInstance,
   mergeProps,
@@ -14,33 +11,35 @@ import {
   Teleport,
 } from "vue";
 import Sortable from "sortablejs";
-import axios, { uploadURL, ip } from "@/basics/request";
+import axios, { uploadURL, ip, CancelToken } from "@/basics/request";
 import ElImageViewer from "element-plus/es/el-image-viewer/index.js";
 export default defineComponent({
-  name: "c-upload",
-  inhertAttrs: false,
+  name: "c-handle-upload-pic",
+  inheritAttrs: false,
   props: {
     modelValue: {
       type: Array,
       default: () => [],
     },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "uploadMethods"],
   components: {
     ElImageViewer,
     Teleport,
   },
-  setup(props, { attrs, emit }) {
+  setup(props, { attrs, slots, emit }) {
     const { ctx } = getCurrentInstance();
     const uploadRef = ref(null);
+    var MergeAttrs = {},
+      UploadRefMethods = {};
     const STATE = reactive({
       Preview: {
         initialIndex: 0,
         visible: false,
         list: [],
       },
+      UploadLoading: false,
     });
-    var MergeAttrs = {};
     const METHODS = {
       // 超出上传数量
       useExceed: () => ctx.Message.warning(`最多可以上传${MergeAttrs.limit}张`),
@@ -83,9 +82,11 @@ export default defineComponent({
           } else {
             const names = file.name.split(".");
             const suffix = names[names.length - 1].toLocaleLowerCase();
-            if (accept.some((acc) => acc === "image/*")) {
-              // 文件后缀名 jpg pdf doc
-              pass = TypeSuffix["image/*"].some(
+
+            const Types = Object.keys(TypeSuffix);
+
+            if (accept.some((acc) => Types[acc])) {
+              pass = TypeSuffix[accept.toString()].some(
                 (imgType) => imgType.toLocaleLowerCase() === suffix
               );
             } else {
@@ -119,12 +120,30 @@ export default defineComponent({
         };
       })(),
       // 删除文件询问
-      useBeforeRemove: () =>
-        ctx.MessageBox.confirm("是否删除该文件?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }),
+      useBeforeRemove: (file) => {
+        if (file.status === "uploading") {
+          ctx.Message.warning("文件正在上传中，请先终止上传再删除。");
+          return false;
+          /* return new Promise((resolve, reject) => {
+            ctx.MessageBox.confirm("文件正在上传中，是否删除该文件?", "提示", {
+              confirmButtonText: "确定",
+              cancelButtonText: "取消",
+              type: "warning",
+            })
+              .then(() => {
+                UploadRefMethods.onAbort();
+                resolve();
+              })
+              .catch(() => reject());
+          }); */
+        } else {
+          return ctx.MessageBox.confirm("是否删除该文件?", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning",
+          });
+        }
+      },
       // 自定义上传
       useHttpRequest: (() => {
         let timer = null;
@@ -133,6 +152,7 @@ export default defineComponent({
           IMGS[file.file.uid] = file;
           clearTimeout(timer);
           timer = setTimeout(() => {
+            STATE.UploadLoading = true;
             const FileBuffer = new FormData();
             for (let uid in IMGS) {
               FileBuffer.append(uid, IMGS[uid].file);
@@ -140,6 +160,9 @@ export default defineComponent({
             axios
               .post(uploadURL, FileBuffer, {
                 headers: { "Content-Type": "multipart/form-data" },
+                cancelToken: new CancelToken(
+                  (c) => (UploadRefMethods.onAbort = () => c({ code: 200 }))
+                ),
                 onUploadProgress: (progressEvent) => {
                   const complete =
                     ((progressEvent.loaded / progressEvent.total) * 100) | 0;
@@ -165,9 +188,10 @@ export default defineComponent({
                   }
                 }
                 IMGS = {};
-              });
+              })
+              .finally(() => (STATE.UploadLoading = false));
             timer = null;
-          }, 1000);
+          }, 300);
         };
       })(),
     };
@@ -199,15 +223,28 @@ export default defineComponent({
               : ip + url
           ),
         };
-        console.log(STATE.Preview);
       },
     };
     onMounted(() => {
-      if (uploadRef.value.$el.querySelector(".el-upload-list")) {
-        Sortable.create(uploadRef.value.$el.querySelector(".el-upload-list"), {
+      UploadRefMethods = {
+        onInit: () => {
+          UploadRefMethods.onAbort();
+          uploadRef.value.clearFiles();
+        },
+        onSuccess: () =>
+          props["modelValue"].some(({ status }) => status !== "success"),
+        onSubmit: HANDLES.onSubmit,
+        onClearFiles: uploadRef.value.clearFiles,
+        onAbort: () => {},
+      };
+      emit("uploadMethods", UploadRefMethods);
+      const UploadListDom = uploadRef.value.$el.querySelector(
+        ".el-upload-list"
+      );
+      if (UploadListDom) {
+        Sortable.create(UploadListDom, {
           onEnd: (evt) => {
             const tempArr = props["modelValue"].slice();
-            console.log(tempArr);
             tempArr.splice(evt.newIndex, 0, tempArr.splice(evt.oldIndex, 1)[0]);
             emit("update:modelValue", tempArr);
           },
@@ -234,18 +271,65 @@ export default defineComponent({
     return () =>
       h(
         <>
-          <el-upload ref={uploadRef} {...MergeAttrs}>
-            {STATE.imageUrl ? (
-              <img src={STATE.imageUrl} class="avatar" />
-            ) : (
-              <i class="el-icon-plus avatar-uploader-icon"></i>
-            )}
-          </el-upload>
-          <el-button onClick={HANDLES.onSubmit}>上传</el-button>
+          <el-upload
+            ref={uploadRef}
+            {...MergeAttrs}
+            v-slots={{
+              ...slots,
+              default: () => (
+                <>
+                  <br />
+                  <el-button
+                    plain
+                    onClick={() => {
+                      if (STATE.UploadLoading) {
+                        UploadRefMethods.onAbort();
+                        props["modelValue"].forEach(
+                          (file) =>
+                            (file.status =
+                              file.status === "uploading"
+                                ? "ready"
+                                : file.status)
+                        );
+                      } else {
+                        HANDLES.onSubmit();
+                      }
+                    }}
+                    type={STATE.UploadLoading ? "warning" : "primary"}
+                  >
+                    {STATE.UploadLoading ? "终止文件上传" : "上传到服务器"}
+                  </el-button>
+                  <el-button
+                    plain
+                    type="danger"
+                    onClick={() => {
+                      ctx.MessageBox.confirm("是否删除所有文件?", "提示", {
+                        confirmButtonText: "确定",
+                        cancelButtonText: "取消",
+                        type: "warning",
+                      }).then(() => {
+                        UploadRefMethods.onAbort();
+                        UploadRefMethods.onClearFiles();
+                      });
+                    }}
+                    style="margin-right: 20px"
+                  >
+                    清空所有文件
+                  </el-button>
+                </>
+              ),
+              trigger: () =>
+                STATE.imageUrl ? (
+                  <img src={STATE.imageUrl} class="avatar" />
+                ) : (
+                  <i class="el-icon-plus avatar-uploader-icon"></i>
+                ),
+            }}
+          />
           {STATE.Preview.visible ? (
             <Teleport to="body">
               <el-image-viewer
-                z-index={2021}
+                z-index={3000}
                 initial-index={STATE.Preview.initialIndex}
                 url-list={STATE.Preview.list}
                 onClose={() => (STATE.Preview.visible = false)}
@@ -272,6 +356,13 @@ export default defineComponent({
     height: unset;
     width: unset;
   }
+}
+.el-upload-list {
+  display: inline-block;
+  line-height: 1;
+}
+.el-upload--picture-card {
+  margin-bottom: 10px;
 }
 .hidden .el-upload--picture-card {
   display: none;

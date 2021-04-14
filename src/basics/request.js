@@ -22,12 +22,16 @@ let instance = axios.create({
 
 });
 /* 终止重复请求 */
-const CancelToken = axios.CancelToken;
+export const CancelToken = axios.CancelToken;
 export const CancelTokenPendings = new CancelTokenPending();
 
 // 拦截器设置全局请求参数
 instance.interceptors.request.use(config => {
     const { url, method, headers, params, data } = config;
+    // 上传文件
+    if (headers['Content-Type'] === "multipart/form-data") {
+        return config;
+    }
     const pending = { u: (url + '&' + method), f: () => { } }
     // 终止重复的请求接口
     CancelTokenPendings.REMOVE_PENGDING(pending);
@@ -35,10 +39,6 @@ instance.interceptors.request.use(config => {
         // 标识是用请求地址&请求方式拼接的字符串
         CancelTokenPendings.ADD_PENGDING({ ...pending, f: c })
     });
-    // 上传文件
-    if (headers['Content-Type'] === "multipart/form-data") {
-        return config;
-    }
     // 处理数据
     if (method === 'get') {
         config.url = url + ('?' + (stringifyQuery(params).slice(0, -1)))

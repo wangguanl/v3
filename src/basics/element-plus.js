@@ -172,6 +172,7 @@ const plugins = [
     ElNotification,
     ElLoading,
 ]
+ElDialog.props.closeOnClickModal.default = false
 export default {
     install(app, options = {}) {
         components.forEach(component => app.component(component.name, component))

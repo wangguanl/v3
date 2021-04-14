@@ -7,9 +7,7 @@ import store from '@/store'
 
 const app = createApp(App);
 
-import cupload from '@/components/c-upload'
-app.component(cupload.name, cupload)
-
+import components from '@/components'
 /* 组件库 */
 import elementPlus from '@/basics/element-plus'
-app.use(store).use(router).use(elementPlus).mount('#app')
+app.use(store).use(router).use(elementPlus).use(components).mount('#app')
