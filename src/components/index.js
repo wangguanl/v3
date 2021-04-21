@@ -1,6 +1,6 @@
-import cHandleUploadPic from '@/components/c-upload/handle-upload-pic.vue'
+import dialog from '@/components/dialog/index.vue'
 export default {
     install: (app) => {
-        app.component(cHandleUploadPic.name, cHandleUploadPic)
+        app.component(dialog.name, dialog)
     }
 }

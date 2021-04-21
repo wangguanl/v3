@@ -36,13 +36,14 @@ module.exports = [
     url: '/dictionaries',
     type: 'post',
     response: () => ({
-      gender: [{
-        value: 0,
-        label: '女'
-      }, {
-        value: 1,
-        label: '男'
-      }]
+      gender: {
+        0: {
+          label: '女'
+        },
+        1: {
+          label: '男'
+        }
+      }
     })
   },
   {

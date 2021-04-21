@@ -7,7 +7,7 @@ import store from '@/store'
 
 const app = createApp(App);
 
-import components from '@/components'
 /* 组件库 */
 import elementPlus from '@/basics/element-plus'
+import components from '@/components'   // 自定义组件
 app.use(store).use(router).use(elementPlus).use(components).mount('#app')

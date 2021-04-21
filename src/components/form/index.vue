@@ -9,8 +9,9 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { DICTIONARIES } from "@/store/types";
+import useConcatConfig from "../hooks/concat-config";
 export default defineComponent({
-  name: "c-form",
+  name: "com-form",
   inheritAttrs: false,
   props: {
     modelValue: { type: Object, default: () => ({}) }, // 双向数据绑定
@@ -20,7 +21,7 @@ export default defineComponent({
       * {
          * type: 'input',  <String> el-[type] 元素类型
          * key: 'xingming',  <String> 表单key
-         * selectOptions: '', <Array | String>; Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
+         * selectOptions: '', <Object | String>; Object: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
          * 参考组件库的api
          * attrs: {}, <Object> el-[type]元素的attrs
          * formItem: {
@@ -28,15 +29,16 @@ export default defineComponent({
          * }, <Object> el-form-item 的 attrs
         }
      */
-    options: { type: Array, default: () => [] },
+    options: { type: [Object, Array], default: () => [] },
 
     // 参考 el-form-item 组件库的api
     elFormItem: Object,
   },
-  emits: ["update:modelValue", "validate"],
+  emits: ["update:modelValue", "formMethods"],
   setup(props, { emit, slots, attrs }) {
     const Store = useStore();
     const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
+    const OPTIONS = useConcatConfig(props["options"]);
     /*
      * key => 键
      * val => 值
@@ -64,23 +66,32 @@ export default defineComponent({
             default: () => {
               /*
                * 两种类型使用
-               * selectOptions <Array | String> Array: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
+               * selectOptions <Object | String> Object: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
                */
-              let dictionariesOptions = [];
+              let dictionariesOptions = {};
               if (
                 typeof selectOptions === "string" &&
                 Dictionaries.value[selectOptions]
               ) {
-                dictionariesOptions = Dictionaries.value[selectOptions].map(
-                  ({ value, label }) => ({
-                    label,
-                    value,
-                  })
+                for (let dictionarieKey in Dictionaries.value[selectOptions]) {
+                  dictionariesOptions[dictionarieKey] = {
+                    ...Dictionaries.value[selectOptions],
+                    label:
+                      Dictionaries.value[selectOptions][dictionarieKey].label,
+                  };
+                }
+              }
+              let optionsDom = [];
+              for (let dictionarieKey in dictionariesOptions) {
+                optionsDom.push(
+                  <el-option
+                    value={dictionarieKey}
+                    label={dictionariesOptions[dictionarieKey].label}
+                    key={dictionarieKey}
+                  />
                 );
               }
-              return dictionariesOptions.map(({ label, value }) => (
-                <el-option value={value} label={label} key={value} />
-              ));
+              return optionsDom;
             },
           },
         ],
@@ -146,7 +157,13 @@ export default defineComponent({
         },
       };
       return (option) => {
-        const { type, key, formItem = {}, attrs: elTypeAttrs } = option;
+        const {
+          type,
+          key,
+          formItem = {},
+          attrs: elTypeAttrs,
+          slots: elTypeSlots,
+        } = option;
         const [Attrs, Slots] = config[type](option);
 
         return h(
@@ -158,7 +175,7 @@ export default defineComponent({
             ...Attrs,
             ...elTypeAttrs,
           },
-          Slots
+          { ...Slots, ...elTypeSlots }
         );
       };
     })();
@@ -167,7 +184,7 @@ export default defineComponent({
       // 集成表单的rules
       const Rules = attrs["rules"] || [];
       // 将option展开并去除null、undefined等空值
-      const Options = props["options"].flat().filter((option) => {
+      const Options = OPTIONS.flat().filter((option) => {
         if (option && !Rules[option.key]) {
           Rules[option.key] = [];
         }
@@ -190,7 +207,7 @@ export default defineComponent({
 
     const elFormRef = ref(null);
     onMounted(() => {
-      emit("validate", elFormRef.value);
+      emit("formMethods", elFormRef.value);
     });
 
     return () =>
@@ -203,7 +220,7 @@ export default defineComponent({
           v-slots={{
             default: () => (
               <>
-                {props["options"].map((option) => {
+                {OPTIONS.map((option) => {
                   const { key, formItem } = option;
                   return (
                     <el-form-item

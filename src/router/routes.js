@@ -1,5 +1,5 @@
 const ModulesFiles = require.context('./modules', true, /\.js$/);
-const { Menu } = ModulesFiles.keys().reduce((modules, modulePath) => {
+const { Menu, ComponentsDemo } = ModulesFiles.keys().reduce((modules, modulePath) => {
     const moduleName = modulePath.replace(/^\.\/(.*)\.\w+$/, '$1');
     const value = ModulesFiles(modulePath);
     modules[moduleName] = value.default;
@@ -28,6 +28,13 @@ export const constantRouterMap = [{
             meta: { title: '嵌套路由', icon: 'el-icon-s-grid' },
             component: () => import(/* webpackChunkName: "Menu" */ '@/views/Menu'),
             children: Menu
+        },
+        {
+            path: 'componentsdemo',
+            name: 'ComponentsDemo',
+            meta: { title: '全局组件', icon: 'el-icon-s-grid' },
+            component: () => import(/* webpackChunkName: "ComponentsDemo" */ '@/views/ComponentsDemo'),
+            children: ComponentsDemo
         },
     ]
 }, {

@@ -5,54 +5,38 @@ import { formOptions, searchOptions, columnsOptions } from "./config";
 /* 模拟数据 */
 import { FetchPostDictionaries, FetchPostTableData } from "./api";
 
-/*  */
-import hookDrag from "./hooks/drag";
-import utilDrag from "./utils/drag";
-
 import { useStore } from "vuex";
 import { DICTIONARIES } from "@/store/types";
-
 import {
-  Teleport,
   reactive,
   h,
-  ref,
   defineAsyncComponent,
-  onMounted,
-  Suspense,
   getCurrentInstance,
+  nextTick,
+  defineComponent,
 } from "vue";
-export default {
+import ComSearchBar from "@/components/searchbar";
+import ComTable from "@/components/table";
+import ComForm from "@/components/form";
+
+export default defineComponent({
   components: {
-    // "c-upload": defineAsyncComponent(() =>
-    //   import(/*webpackChunkName: "c-upload"*/ "@/components/c-upload")
-    // ),
-    "c-table": defineAsyncComponent(() =>
-      import(/*webpackChunkName: "c-table"*/ "@/components/c-table")
-    ),
-    "c-form": defineAsyncComponent(() =>
-      import(/*webpackChunkName: "c-form"*/ "@/components/c-form")
+    ComSearchBar,
+    ComTable,
+    ComForm,
+    ComHandleUploadPic: defineAsyncComponent(() =>
+      import(
+        /* webpackChunkName: "ComHandleUploadPic" */ "@/components/upload/handle-upload-pic"
+      )
     ),
   },
-  directives: {
-    // 使用自定义指令控制dialog拖拽，但是因为teleport多根元素的原因，vue弹出waring而无法绑定，所以只是设想，还没有真正应对teleport的实施方案, 现在的拖拽有bug
-    drag: {
-      created() {},
-      mounted() {},
-    },
-    /* 设想2 */
-    // 控制dialog的缩放
-    zoom: {},
-    /* 设想3 */
-    // 控制dialog的最小化、还原
-    minimize: {},
-  },
-  setup() {
+  async setup() {
+    const Store = useStore();
     const { ctx } = getCurrentInstance();
     // 响应式数据
     const STATE = reactive({
       LOADINGS: {
-        table: false,
+        table: true,
         submit: false,
       },
       SEARCHBAR: {}, // 搜索条件
@@ -66,10 +50,12 @@ export default {
         currentPage: 1,
       },
       DIALOG: {
-        modelValue: true,
-        title: "",
-        width: "1000px",
-        top: "0",
+        visible: false,
+        attr: {
+          title: "",
+          width: "1000px",
+          top: "0",
+        },
       },
 
       FORM: {
@@ -77,123 +63,132 @@ export default {
       },
     });
     // 操作事件函数
-    const HANDLES = {};
+    const HANDLES = {
+      UPLOAD: {},
+      FORM: {},
+      onToggleOpenDialog: (visible, attr = {}) => {
+        STATE["DIALOG"] = {
+          visible,
+          attr: { ...STATE["DIALOG"].attr, ...attr },
+        };
+      },
+    };
 
     // 方法
     const METHDOS = {
       // 获取字典集
-      FetchPostDictionaries: () => {
-        return new Promise(async (resolve, reject) => {
-          const Store = useStore();
-          const data = await FetchPostDictionaries();
-          await Store.commit(DICTIONARIES.mutations, data);
-
-          resolve();
-        });
+      FetchPostDictionaries: async () => {
+        const data = await FetchPostDictionaries();
+        Store.commit(DICTIONARIES.mutations, data);
       },
       // 获取表格数据
-      FetchPostTableData: () => {
+      FetchPostTableData: async () => {
         STATE["LOADINGS"].table = true;
         const { name, qq, gender } = STATE["SEARCHBAR"];
         const { currentPage, pageSize } = STATE["PAGINATION"];
-        FetchPostTableData({ name, qq, gender, currentPage, pageSize })
-          .then(({ data, total }) => {
-            STATE["TABLE"] = data.map((item) => {
-              item.genderName = ["女", "男"][item.gender];
-              return item;
-            });
-            STATE["PAGINATION"].total = total;
-          })
-          .finally(() => (STATE["LOADINGS"].table = false));
+        const { data, total } = await FetchPostTableData({
+          name,
+          qq,
+          gender,
+          currentPage,
+          pageSize,
+        });
+        STATE["TABLE"] = data.map((item) => {
+          item.genderName =
+            Store.state[DICTIONARIES.state].gender[item.gender].label;
+          return item;
+        });
+        STATE["PAGINATION"].total = total;
+        STATE["LOADINGS"].table = false;
       },
     };
 
     // 接口初始化
-    (async () => {
-      await METHDOS.FetchPostDictionaries();
-      METHDOS.FetchPostTableData();
-    })();
+    await METHDOS.FetchPostDictionaries();
+    await METHDOS.FetchPostTableData();
 
-    // 设置dialog
-    const dialogRef = ref(null);
-    const dialogFormRef = ref(null);
-    // hookDrag(dialogRef);
-    onMounted(() => {
-      // utilDrag(dialogRef.value.dialogRef);
-    });
-
+    const SearchOptions = searchOptions();
+    SearchOptions.name.slots = {
+      append: () => (
+        <el-button
+          icon="el-icon-search"
+          type="primary"
+          onClick={() => {
+            STATE["PAGINATION"].currentPage = 1;
+            METHDOS.FetchPostTableData();
+          }}
+        />
+      ),
+    };
     return () =>
       h(
-        // <Suspense>
         <div className="wrap">
-          <c-form
-            options={searchOptions}
-            v-model={STATE["SEARCHBAR"]}
-            inline
-            v-slots={{
+          <ComSearchBar
+            options={searchOptions()}
+            vModel={STATE["SEARCHBAR"]}
+            vSlots={{
               default: () => (
                 <>
-                  <el-form-item>
-                    <el-button
-                      type="primary"
-                      onClick={() => {
-                        STATE["PAGINATION"].currentPage = 1;
-                        METHDOS.FetchPostTableData();
-                      }}
-                    >
-                      搜索
-                    </el-button>
-                  </el-form-item>
+                  <el-button
+                    icon="el-icon-search"
+                    type="primary"
+                    onClick={() => {
+                      STATE["PAGINATION"].currentPage = 1;
+                      METHDOS.FetchPostTableData();
+                    }}
+                  >
+                    搜索
+                  </el-button>
 
-                  <el-form-item style="float: right;">
-                    <el-button
-                      type="primary"
-                      onClick={() => {
-                        STATE["FORM"] = {
-                          fileList: [],
-                        };
-                        STATE["DIALOG"].modelValue = true;
-                        STATE["DIALOG"].title = "新增";
-                      }}
-                    >
-                      新增
-                    </el-button>
-                    <el-button
-                      type="danger"
-                      onClick={() => {
-                        console.log(STATE["SELECTIONS"]);
-                      }}
-                    >
-                      批量删除
-                    </el-button>
-                  </el-form-item>
+                  <el-button
+                    type="primary"
+                    icon="el-icon-plus"
+                    onClick={() => {
+                      HANDLES.onToggleOpenDialog(true, {
+                        title: "新增",
+                      });
+                    }}
+                  >
+                    新增
+                  </el-button>
+                  <el-button
+                    icon="el-icon-delete"
+                    type="danger"
+                    onClick={() => {
+                      console.log(STATE["SELECTIONS"]);
+                    }}
+                  >
+                    批量删除
+                  </el-button>
                 </>
               ),
             }}
           />
-          <c-table
+          <ComTable
             v-loading={STATE["LOADINGS"].table}
             datas={STATE["TABLE"]}
-            columns={columnsOptions}
+            columns={columnsOptions()}
             onSelectionChange={(rows) => (
               console.log(rows), (STATE["SELECTIONS"] = [...rows])
             )}
             type="selection"
-            v-slots={{
+            el-table-column={{ align: "center" }}
+            vSlots={{
               default: () => (
                 <el-table-column
                   label="操作"
                   width="200"
                   fixed="right"
                   align="center"
-                  v-slots={{
+                  vSlots={{
                     default: ({ row }) => (
                       <>
                         <el-button
                           onClick={() => {
                             console.log(row);
-                            STATE["DIALOG"].modelValue = true;
-                            STATE["DIALOG"].title = "编辑";
+                            HANDLES.onToggleOpenDialog(true, {
+                              title: "编辑",
+                            });
                             STATE["FORM"] = { fileList: [], ...row };
                           }}
                         >
@@ -225,33 +220,49 @@ export default {
               METHDOS.FetchPostTableData();
             }}
           />
-          <el-dialog
-            ref={dialogRef}
-            {...STATE["DIALOG"]}
-            v-model={STATE["DIALOG"].modelValue}
-            v-slots={{
+          <com-dialog
+            {...STATE["DIALOG"].attr}
+            onClosed={async () => {
+              STATE["FORM"] = {
+                fileList: [],
+              };
+              HANDLES["FORM"].resetFields();
+              await nextTick();
+              HANDLES["FORM"].clearValidate();
+            }}
+            vModel={STATE["DIALOG"].visible}
+            vSlots={{
               default: () => (
-                <c-form
-                  options={formOptions}
-                  v-model={STATE["FORM"]}
+                <ComForm
+                  options={formOptions()}
+                  vModel={STATE["FORM"]}
                   el-form-item={{ size: "medium" }}
                   label-width="80px"
-                  onValidate={(elFormRef) => {
-                    dialogFormRef.value = elFormRef;
+                  onFormMethods={({
+                    validate,
+                    validateField,
+                    resetFields,
+                    clearValidate,
+                  }) => {
+                    HANDLES["FORM"] = {
+                      validate,
+                      validateField,
+                      resetFields,
+                      clearValidate,
+                    };
                   }}
-                  v-slots={{
+                  vSlots={{
                     default: () => (
                       <>
                         <el-form-item label="上传">
-                          <c-handle-upload-pic
-                            v-model={STATE["FORM"].fileList}
+                          <ComHandleUploadPic
+                            vModel={STATE["FORM"].fileList}
                             limit={3}
                             accept="image/jpeg,image/png"
                             onUploadMethods={({ onInit, onSuccess }) => {
-                              HANDLES.onUploadInit = onInit;
-                              HANDLES.onUploadSuccess = onSuccess;
+                              HANDLES["UPLOAD"] = { onInit, onSuccess };
                             }}
-                            v-slots={{
+                            vSlots={{
                               tip: () => (
                                 <>只能上传 jpg/png 格式文件，且不超过 3 张</>
                               ),
@@ -263,18 +274,19 @@ export default {
                             loading={STATE["LOADINGS"].submit}
                             type="primary"
                             onClick={() => {
-                              if (HANDLES.onUploadSuccess()) {
+                              if (HANDLES["UPLOAD"].onSuccess()) {
                                 ctx.Message.warning("文件正在上传中");
                                 return;
                               }
                               STATE["LOADINGS"].submit = true;
                               dialogFormRef.value.validate((valid) => {
                                 if (valid) {
-                                  STATE["DIALOG"].modelValue = false;
+                                  HANDLES.onToggleOpenDialog(false);
                                 }
-                                setTimeout(() => {
-                                  STATE["LOADINGS"].submit = false;
-                                }, 3000);
+                                setTimeout(
+                                  () => (STATE["LOADINGS"].submit = false),
+                                  3000
+                                );
                               });
                             }}
                           >
@@ -282,8 +294,8 @@ export default {
                           </el-button>
                           <el-button
                             onClick={() => {
-                              HANDLES.onUploadInit();
-                              STATE["DIALOG"].modelValue = false;
+                              HANDLES["UPLOAD"].onInit();
+                              HANDLES.onToggleOpenDialog(false);
                             }}
                           >
                             取消
@@ -296,12 +308,10 @@ export default {
               ),
             }}
           />
-          <Teleport to="body"></Teleport>
         </div>
-        // </Suspense>
       );
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -311,51 +321,12 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  & > .el-form {
-    flex-shrink: 0;
-    padding: 10px;
-    padding-bottom: 0;
-    :deep(.el-form-item) {
-      margin-bottom: 10px;
-    }
-  }
-  & > .el-table {
-    flex: 1;
-    overflow: hidden;
-  }
-  & > .el-pagination {
+  .el-pagination {
     flex-shrink: 0;
     padding: 10px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-  }
-}
-:deep(.el-overlay) {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5vh 0;
-  box-sizing: border-box;
-  .el-dialog {
-    margin: unset;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    padding: 10px;
-    .el-dialog__header {
-      flex-shrink: 0;
-      cursor: move;
-    }
-    .el-dialog__body {
-      padding: 20px;
-      flex: 1;
-      overflow: auto;
-    }
   }
 }
 </style>

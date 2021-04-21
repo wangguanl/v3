@@ -4,7 +4,7 @@ module.exports = {
     // publicPath: './', // 相对路径
     productionSourceMap: false,
     devServer: {
-        before: require('./src/mock')
+        before: require('./mock')
     },
     css: {
         loaderOptions: {
@@ -16,6 +16,21 @@ module.exports = {
             }
         }
     },
+    /* chainWebpack(config) {
+        // 可以提高第一屏的速度，建议开启预加载
+        config.plugin('preload').tap(() => [
+            {
+                rel: 'preload',
+                fileBlacklist: [/\.map$/, /hot-update\.js$/, /runtime\..*\.js$/],
+                include: 'initial'
+            }
+        ]);
+        // 当页面太多时，会导致太多无意义的请求
+        config.plugins.delete('prefetch');
+        config
+            .plugin('webpack-bundle-analyzer')
+            .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+    } */
     /* configureWebpack: config => {
         // gzip
         config.plugins.push(
@@ -32,10 +47,5 @@ module.exports = {
             "maxAssetSize": 30000000
         }
     }, */
-    /* chainWebpack: config => {
-        config
-            .plugin('webpack-bundle-analyzer')
-            .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
-    } */
 
 }

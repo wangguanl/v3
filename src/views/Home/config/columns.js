@@ -1,37 +1,33 @@
-export default [
-  {
+export default () => ({
+  name: {
     label: '姓名',
-    key: 'name',
     attrs: {
       width: 160,
     },
-  }, {
-    label: 'qq',
-    key: 'qq',
-    attrs: {
-      width: 160,
-    }
-  }, {
+  },
+  genderName: {
     label: '性别',
-    key: 'genderName',
     attrs: {
       width: 60,
     }
-  }, {
+  },
+  qq: {
+    label: 'qq',
+    attrs: {
+      width: 160,
+    }
+  },
+  content: {
     label: '内容',
-    key: 'content',
     attrs: {
       minWidth: 200,
       align: 'left'
     }
-  }, {
+  },
+  createTime: {
     label: '创建时间',
-    key: 'createTime',
     attrs: {
       width: 200
     }
   }
-].map(item => {
-  item.attrs.align = item.attrs.align || 'center';
-  return item;
-})
+});

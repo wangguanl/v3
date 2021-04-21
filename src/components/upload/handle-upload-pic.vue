@@ -13,8 +13,8 @@ import {
 import Sortable from "sortablejs";
 import axios, { uploadURL, ip, CancelToken } from "@/basics/request";
 import ElImageViewer from "element-plus/es/el-image-viewer/index.js";
-export default defineComponent({
-  name: "c-handle-upload-pic",
+export default {
+  name: "com-handle-upload-pic",
   inheritAttrs: false,
   props: {
     modelValue: {
@@ -339,7 +339,7 @@ export default defineComponent({
         </>
       );
   },
-});
+};
 </script>
 
 <style lang="scss">

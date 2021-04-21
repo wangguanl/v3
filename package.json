@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "core-js": "^3.10.1",
+    "core-js": "^3.10.2",
     "element-plus": "^1.0.1-beta.27",
     "nprogress": "^0.2.0",
     "sortablejs": "^1.13.0",
@@ -30,9 +30,9 @@
     "chokidar": "^3.5.1",
     "compression-webpack-plugin": "^5.0.2",
     "mockjs": "^1.1.0",
-    "sass": "^1.32.8",
+    "sass": "^1.32.11",
     "sass-loader": "^8.0.2",
-    "webpack-bundle-analyzer": "^4.4.0"
+    "webpack-bundle-analyzer": "^4.4.1"
   },
   "browserslist": [
     "> 1%",

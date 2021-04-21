@@ -3,16 +3,22 @@ const bodyParser = require('body-parser')
 const chalk = require('chalk')
 const path = require('path')
 const mockDir = path.join(process.cwd(), 'mock')
-
 // 注册路由
 function registerRoutes(app) {
   let mockLastIndex
   const Mocks = require('./modules/home')
   Mocks.map(({ url, type = 'get', response }) => {
-    app[type](new RegExp(url), (req, res) => res.json({
-      code: 200,
-      result: response(req)
-    }))
+    // const timer = Math.ceil(Math.random() * 10000);
+    // console.log(timer)
+    app[type](new RegExp(url), (req, res) => {
+      // setTimeout(() => {
+      res.json({
+        code: 200,
+        result: response(req)
+      })
+
+      // }, timer)
+    });
     mockLastIndex = app._router.stack.length
   })
   const mockRoutesLength = Object.keys(Mocks).length
@@ -46,10 +52,11 @@ module.exports = app => {
 
   // 监听文件改动，热更新服务
   chokidar.watch(mockDir, {
-    ignored: /mock-server/,
-    ignoreInitial: true
+    // ignored: /mock/,
+    // ignoreInitial: true
   }).on('all', (event, path) => {
     if (event === 'change' || event === 'add') {
+      console.log(456)
       try {
         // 监听文件改动，清空已经注册的路由stack
         app._router.stack.splice(mockStartIndex, mockRoutesLength)

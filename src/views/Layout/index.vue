@@ -72,9 +72,17 @@
       </el-header>
       <el-main class="main">
         <router-view #default="{ Component }">
-          <transition name="fade">
-            <component :is="Component" />
-          </transition>
+          <!-- <transition name="el-fade-in"> -->
+          <suspense>
+            <template #default>
+              <component :is="Component" />
+            </template>
+
+            <template #fallback>
+              <div>加载中...</div>
+            </template>
+          </suspense>
+          <!-- </transition> -->
         </router-view>
       </el-main>
     </el-container>
@@ -85,25 +93,16 @@
 import { mapMutations } from "vuex";
 import { USERINFO } from "@/store/types";
 import { defineAsyncComponent } from "vue";
+import sidebarItem from "./components/sidebarItem";
 export default {
-  data() {
-    return {
-      isCollapse: false,
-      levelList: null,
-    };
-  },
-  methods: {
-    ...mapMutations([USERINFO.mutations]),
-    onLogout() {
-      this[USERINFO.mutations]();
-    },
+  components: {
+    sidebarItem,
   },
   computed: {
     routes() {
       return this.$route.matched[0].children;
     },
   },
-
   watch: {
     $route: {
       handler() {
@@ -112,8 +111,17 @@ export default {
       immediate: true,
     },
   },
-  components: {
-    sidebarItem: defineAsyncComponent(() => import("./components/sidebarItem")),
+  data() {
+    return {
+      isCollapse: false,
+      levelList: [],
+    };
+  },
+  methods: {
+    ...mapMutations([USERINFO.mutations]),
+    onLogout() {
+      this[USERINFO.mutations]();
+    },
   },
 };
 </script>
