@@ -32,7 +32,7 @@ export const constantRouterMap = [{
         {
             path: 'componentsdemo',
             name: 'ComponentsDemo',
-            meta: { title: '全局组件', icon: 'el-icon-s-grid' },
+            meta: { title: '组件 demo', icon: 'el-icon-s-grid' },
             component: () => import(/* webpackChunkName: "ComponentsDemo" */ '@/views/ComponentsDemo'),
             children: ComponentsDemo
         },

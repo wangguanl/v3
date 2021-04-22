@@ -74,8 +74,6 @@ export default defineComponent({
     width: 100%;
     height: 40px;
     background-color: #ffffff;
-    border-radius: 4px;
-    overflow: hidden;
     box-sizing: border-box;
     display: flex;
     & + * {
@@ -105,10 +103,10 @@ export default defineComponent({
       border-right: 0;
       box-sizing: border-box;
     }
-    :deep([class^="el-"]) {
+    [class^="el-"] {
       flex: 1;
       .el-input__inner {
-        border-radius: 0;
+        border-radius: 0 4px 4px 0;
       }
     }
   }

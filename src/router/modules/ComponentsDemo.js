@@ -6,10 +6,25 @@ export default [
     component: () => import(/* webpackChunkName: "SearchBar" */ '@/views/ComponentsDemo/SearchBar'),
     children: []
   },
-  // {
-  //   path: 'menu2',
-  //   name: 'Menu2',
-  //   meta: { title: '子路由2', icon: 'el-icon-s-check' },
-  //   component: () => import(/* webpackChunkName: "Menu2" */ '@/views/ComponentDemos/Menu2'),
-  // },
+  {
+    path: 'table',
+    name: 'Table',
+    meta: { title: '表格-table', icon: 'el-icon-s-check' },
+    component: () => import(/* webpackChunkName: "Table" */ '@/views/ComponentsDemo/Table'),
+    children: []
+  },
+  {
+    path: 'form',
+    name: 'Form',
+    meta: { title: '表单-form', icon: 'el-icon-s-check' },
+    component: () => import(/* webpackChunkName: "Form" */ '@/views/ComponentsDemo/Form'),
+    children: []
+  },
+  {
+    path: 'handleuploadpic',
+    name: 'handleUploadPic',
+    meta: { title: '上传-handleUploadPic', icon: 'el-icon-s-check' },
+    component: () => import(/* webpackChunkName: "handleUploadPic" */ '@/views/ComponentsDemo/Upload/handleUploadPic'),
+    children: []
+  },
 ]

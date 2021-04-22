@@ -107,19 +107,7 @@ export default defineComponent({
     await METHDOS.FetchPostDictionaries();
     await METHDOS.FetchPostTableData();
 
-    const SearchOptions = searchOptions();
-    SearchOptions.name.slots = {
-      append: () => (
-        <el-button
-          icon="el-icon-search"
-          type="primary"
-          onClick={() => {
-            STATE["PAGINATION"].currentPage = 1;
-            METHDOS.FetchPostTableData();
-          }}
-        />
-      ),
-    };
+    
     return () =>
       h(
         <div className="wrap">
@@ -279,7 +267,7 @@ export default defineComponent({
                                 return;
                               }
                               STATE["LOADINGS"].submit = true;
-                              dialogFormRef.value.validate((valid) => {
+                              HANDLES['FORM'].validate((valid) => {
                                 if (valid) {
                                   HANDLES.onToggleOpenDialog(false);
                                 }
