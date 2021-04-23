@@ -1,73 +1,71 @@
 import {
-  defineComponent,
   resolveComponent,
   h,
   computed,
 } from "vue";
 import { useStore } from "vuex";
 import { DICTIONARIES } from "@/store/types";
+import formatDate from '../utils/formatDate'
 export default (props, { emit }) => {
   const Store = useStore();
   const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
   /*
    * key => 键
    * val => 值
-   * immediately => Boolean 是否调用查询
    */
-  const onUpdate = (key, val, immediately) => {
+  const onUpdate = (key, val) => {
     props["modelValue"][key] = val;
     emit("update:modelValue", props["modelValue"]);
   };
   /* 
     清空内容
   */
-  const onClear = (key) => onUpdate(key, "", true);
+  const onClear = (key) => onUpdate(key, "");
 
-  const generateVNode = (() => {
+  return (() => {
     // 组件基本配置
     const config = {
       select: ({ key, selectOptions }) => [
         {
           clearable: true,
-          onChange: (val) => onUpdate(key, val, true),
+          onChange: (val) => onUpdate(key, val),
           onClear: () => onClear(key),
         },
         {
           default: () => {
             /*
-            * 两种类型使用
-            * selectOptions <Object | String> Object: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
-            */
-            let dictionariesOptions = {};
+             * 两种类型使用
+             * selectOptions <Object | String> Object: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
+             */
             if (
               typeof selectOptions === "string" &&
               Dictionaries.value[selectOptions]
             ) {
-              for (let dictionarieKey in Dictionaries.value[selectOptions]) {
-                dictionariesOptions[dictionarieKey] = {
-                  ...Dictionaries.value[selectOptions],
-                  label: Dictionaries.value[selectOptions][dictionarieKey].label,
-                };
-              }
-            }
-            let optionsDom = [];
-            for (let dictionarieKey in dictionariesOptions) {
-              optionsDom.push(
+              return Object.keys(
+                Dictionaries.value[selectOptions]
+              ).map((key) => (
                 <el-option
-                  value={dictionarieKey}
-                  label={dictionariesOptions[dictionarieKey].label}
-                  key={dictionarieKey}
+                  value={key}
+                  label={Dictionaries.value[selectOptions][key].label}
+                  key={key}
                 />
-              );
+              ));
+            } else {
+              return Object.keys(selectOptions).map((key) => (
+                <el-option
+                  value={key}
+                  label={selectOptions[key].label}
+                  key={key}
+                />
+              ));
             }
-            return optionsDom;
           },
         },
       ],
       input: ({ key }) => [
         {
           clearable: true,
-          onInput: (val) => onUpdate(key, val, false),
+          onInput: (val) => onUpdate(key, val),
           onClear: () => onClear(key),
         },
       ],
@@ -120,7 +118,7 @@ export default (props, { emit }) => {
         return [
           {
             ...Types[elTypeAttrs["type"] || "date"],
-            onChange: (val) => onUpdate(key, val, true),
+            onChange: (val) => onUpdate(key, Array.isArray(val) ? val.map(v => formatDate(v)) : formatDate(val))
           },
         ];
       },
@@ -131,9 +129,10 @@ export default (props, { emit }) => {
         key,
         formItem = {},
         attrs: elTypeAttrs,
-        slots: elTypeSlots = {},
+        slots: elTypeSlots,
       } = option;
-      const [Attrs = {}, Slots = {}] = config[type](option);
+      const [Attrs, Slots] = config[type](option);
+
       return h(
         resolveComponent("el-" + type),
         {
@@ -143,8 +142,8 @@ export default (props, { emit }) => {
           ...Attrs,
           ...elTypeAttrs,
         },
-        { ...Slots, ...elTypeSlots });
+        { ...Slots, ...elTypeSlots }
+      );
     };
   })();
-  return generateVNode
 }

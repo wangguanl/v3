@@ -1,4 +1,13 @@
 export default () => ({
+  date: {
+    type: 'date-picker',
+    attrs: {
+      type: "daterange",
+    },
+    formItem: {
+      label: '年月日',
+    },
+  },
   gender: {
     type: 'select',
     selectOptions: 'gender',
@@ -15,7 +24,6 @@ export default () => ({
     formItem: {
       label: 'qq',
     },
-
   },
   name: {
     type: 'input',

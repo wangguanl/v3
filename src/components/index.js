@@ -1,4 +1,4 @@
-import dialog from '@/components/dialog/index.vue'
+import dialog from '@/components/dialog'
 export default {
     install: (app) => {
         app.component(dialog.name, dialog)

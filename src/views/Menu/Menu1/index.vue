@@ -1,10 +1,8 @@
 <script>
 import { defineComponent, resolveComponent, h, getCurrentInstance } from "vue";
-import searchOptions from "../search";
 
 export default defineComponent({
   setup() {
-    console.log(searchOptions())
     const curInstance = getCurrentInstance();
     console.log(curInstance);
   },

@@ -1,15 +1,7 @@
 <script>
-import {
-  defineComponent,
-  resolveComponent,
-  h,
-  computed,
-  onMounted,
-  ref,
-} from "vue";
-import { useStore } from "vuex";
-import { DICTIONARIES } from "@/store/types";
+import { defineComponent, h, onMounted, ref } from "vue";
 import useConcatConfig from "../hooks/concat-config";
+import generateEl from "../hooks/generate-el";
 export default defineComponent({
   name: "com-form",
   inheritAttrs: false,
@@ -35,150 +27,51 @@ export default defineComponent({
     elFormItem: Object,
   },
   emits: ["update:modelValue", "formMethods"],
-  setup(props, { emit, slots, attrs }) {
-    const Store = useStore();
-    const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
+  setup: (props, { emit, slots, attrs }) => {
     const OPTIONS = useConcatConfig(props["options"]);
-    /*
-     * key => 键
-     * val => 值
-     * immediately => Boolean 是否调用查询
-     */
-    const onUpdate = (key, val, immediately) => {
-      props["modelValue"][key] = val;
-      emit("update:modelValue", props["modelValue"]);
-    };
-    /* 
-      清空内容
-    */
-    const onClear = (key) => onUpdate(key, "", true);
-
-    const generateVNode = (() => {
-      // 组件基本配置
-      const config = {
-        select: ({ key, selectOptions }) => [
-          {
-            clearable: true,
-            onChange: (val) => onUpdate(key, val, true),
-            onClear: () => onClear(key),
-          },
-          {
-            default: () => {
-              /*
-               * 两种类型使用
-               * selectOptions <Object | String> Object: 直接使用 ; String: 意为key，使用全局字典渲染option下拉项
-               */
-              let dictionariesOptions = {};
-              if (
-                typeof selectOptions === "string" &&
-                Dictionaries.value[selectOptions]
-              ) {
-                for (let dictionarieKey in Dictionaries.value[selectOptions]) {
-                  dictionariesOptions[dictionarieKey] = {
-                    ...Dictionaries.value[selectOptions],
-                    label:
-                      Dictionaries.value[selectOptions][dictionarieKey].label,
-                  };
-                }
-              }
-              let optionsDom = [];
-              for (let dictionarieKey in dictionariesOptions) {
-                optionsDom.push(
-                  <el-option
-                    value={dictionarieKey}
-                    label={dictionariesOptions[dictionarieKey].label}
-                    key={dictionarieKey}
-                  />
-                );
-              }
-              return optionsDom;
-            },
-          },
-        ],
-        input: ({ key }) => [
-          {
-            clearable: true,
-            onInput: (val) => onUpdate(key, val, false),
-            onClear: () => onClear(key),
-          },
-        ],
-        "date-picker": ({ key, formItem = {}, attrs: elTypeAttrs = {} }) => {
-          const Types = {
-            date: {
-              shortcuts: [
-                {
-                  text: "今天",
-                  value: new Date(),
-                },
-              ],
-            },
-            daterange: {
-              "range-separator": "-",
-              "start-placeholder": formItem.label + "开始日期",
-              "end-placeholder": formItem.label + "结束日期",
-              shortcuts: [
-                {
-                  text: "最近一周",
-                  value: (() => {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                    return [start, end];
-                  })(),
-                },
-                {
-                  text: "最近一个月",
-                  value: (() => {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                    return [start, end];
-                  })(),
-                },
-                {
-                  text: "最近三个月",
-                  value: (() => {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-                    return [start, end];
-                  })(),
-                },
-              ],
-            },
-            month: {},
-          };
-          return [
-            {
-              ...Types[elTypeAttrs["type"] || "date"],
-              onChange: (val) => onUpdate(key, val, true),
-            },
-          ];
-        },
-      };
-      return (option) => {
-        const {
-          type,
-          key,
-          formItem = {},
-          attrs: elTypeAttrs,
-          slots: elTypeSlots,
-        } = option;
-        const [Attrs, Slots] = config[type](option);
-
-        return h(
-          resolveComponent("el-" + type),
-          {
-            modelValue: props["modelValue"][key],
-            placeholder:
-              "请" + (type === "input" ? "输入" : "选择") + formItem.label,
-            ...Attrs,
-            ...elTypeAttrs,
-          },
-          { ...Slots, ...elTypeSlots }
+    const generateVNode = generateEl(props, { emit, slots, attrs });
+    // 处理数据类型 根据数据类型返回对应的 dom 结构
+    function useComplexType(arrayObject) {
+      // 数组
+      if (Array.isArray(arrayObject)) {
+        const span = 24 / arrayObject.length;
+        return (
+          <el-row>
+            {arrayObject.map((option) => (
+              <el-col span={span}>{useParseComplexType(option)}</el-col>
+            ))}
+          </el-row>
         );
-      };
-    })();
+      } else {
+        // 对象
+        return useParseComplexType(arrayObject);
+      }
+    }
+
+    // 如果对象中存在 key ，则解析对象生成 el-option ， 否则为复杂数据类型
+    function useParseComplexType(option) {
+      if (!option) {
+        return <div />;
+      }
+
+      if (option.key) {
+        return (
+          <el-form-item
+            key={option.key}
+            prop={option.key}
+            {...props["elFormItem"]}
+            {...option.formItem}
+          >
+            {generateVNode(option)}
+          </el-form-item>
+        );
+      }
+      return (
+        <el-form-item {...option.formItem}>
+          {useComplexType(option.value)}
+        </el-form-item>
+      );
+    }
 
     const rules = (() => {
       // 集成表单的rules
@@ -213,6 +106,7 @@ export default defineComponent({
     return () =>
       h(
         <el-form
+          class="component_form"
           ref={elFormRef}
           {...attrs}
           model={props["modelValue"]}
@@ -220,19 +114,7 @@ export default defineComponent({
           v-slots={{
             default: () => (
               <>
-                {OPTIONS.map((option) => {
-                  const { key, formItem } = option;
-                  return (
-                    <el-form-item
-                      key={key}
-                      prop={key}
-                      {...props["elFormItem"]}
-                      {...formItem}
-                    >
-                      {generateVNode(option)}
-                    </el-form-item>
-                  );
-                })}
+                {OPTIONS.map((arrayObject) => useComplexType(arrayObject))}
                 {Object.values(slots).map((slot) => slot())}
               </>
             ),
@@ -242,3 +124,20 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss">
+.component_form {
+  .el-row {
+    width: 100%;
+  }
+  .el-form-item__content {
+    display: flex;
+    .el-input,
+    .el-select {
+      flex: 1;
+    }
+    // [class^="el-"] {
+    //   flex: 1;
+    // }
+  }
+}
+</style>

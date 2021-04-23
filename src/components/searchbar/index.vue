@@ -1,14 +1,7 @@
 <script>
-import {
-  defineComponent,
-  resolveComponent,
-  h,
-  computed,
-  onMounted,
-  ref,
-} from "vue";
+import { defineComponent, h } from "vue";
 
-import generateElForm from "../hooks/generate-el-form";
+import generateEl from "../hooks/generate-el";
 import useConcatConfig from "../hooks/concat-config";
 export default defineComponent({
   name: "com-searchbar",
@@ -35,8 +28,8 @@ export default defineComponent({
     elFormItem: Object,
   },
   emits: ["update:modelValue", "validate"],
-  setup(props, { emit, slots, attrs }) {
-    const generateVNode = generateElForm(props, { emit });
+  setup: (props, { emit, slots, attrs }) => {
+    const generateVNode = generateEl(props, { emit });
     const OPTIONS = useConcatConfig(props["options"]);
     return () =>
       h(
@@ -103,7 +96,7 @@ export default defineComponent({
       border-right: 0;
       box-sizing: border-box;
     }
-    [class^="el-"] {
+    & > [class^="el-"] {
       flex: 1;
       .el-input__inner {
         border-radius: 0 4px 4px 0;

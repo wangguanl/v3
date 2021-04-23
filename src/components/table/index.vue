@@ -29,7 +29,7 @@ export default defineComponent({
     },
   },
   emits: ["selection-change"],
-  setup(props, { emit, slots, attrs }) {
+  setup: (props, { emit, slots, attrs }) => {
     const COLUMNS = useConcatConfig(props["columns"]);
     return () =>
       h(

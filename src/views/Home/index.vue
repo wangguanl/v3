@@ -107,7 +107,6 @@ export default defineComponent({
     await METHDOS.FetchPostDictionaries();
     await METHDOS.FetchPostTableData();
 
-    
     return () =>
       h(
         <div className="wrap">
@@ -121,6 +120,7 @@ export default defineComponent({
                     icon="el-icon-search"
                     type="primary"
                     onClick={() => {
+                      console.log(STATE.SEARCHBAR);
                       STATE["PAGINATION"].currentPage = 1;
                       METHDOS.FetchPostTableData();
                     }}
@@ -267,7 +267,7 @@ export default defineComponent({
                                 return;
                               }
                               STATE["LOADINGS"].submit = true;
-                              HANDLES['FORM'].validate((valid) => {
+                              HANDLES["FORM"].validate((valid) => {
                                 if (valid) {
                                   HANDLES.onToggleOpenDialog(false);
                                 }

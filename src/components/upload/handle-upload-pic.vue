@@ -27,7 +27,7 @@ export default {
     ElImageViewer,
     Teleport,
   },
-  setup(props, { attrs, slots, emit }) {
+  setup: (props, { attrs, slots, emit }) => {
     const { ctx } = getCurrentInstance();
     const uploadRef = ref(null);
     var MergeAttrs = {},
