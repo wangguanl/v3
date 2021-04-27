@@ -15,9 +15,7 @@ import {
   nextTick,
   defineComponent,
 } from "vue";
-import ComSearchBar from "@/components/searchbar";
-import ComTable from "@/components/table";
-import ComForm from "@/components/form";
+import { ComSearchBar, ComTable, ComForm } from "@/components";
 
 export default defineComponent({
   components: {
