@@ -18,7 +18,7 @@ module.exports = {
     },
   },
   chainWebpack(config) {
-    // if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === "development") {
       // 可以提高第一屏的速度，建议开启预加载
       config.plugin("preload").tap(() => [
         {
@@ -29,7 +29,7 @@ module.exports = {
       ]);
       // 当页面太多时，会导致太多无意义的请求
       config.plugins.delete("prefetch");
-    // }
+    }
     // 打包模块图 npm run build --report 查看模块划分npm命令
     // config
     //   .plugin("webpack-bundle-analyzer")
