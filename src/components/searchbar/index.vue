@@ -1,9 +1,11 @@
 <script>
 import { defineComponent, h } from "vue";
-
-import generateEl from "../hooks/generate-el";
-import useConcatConfig from "../hooks/concat-config";
+import { ElGenerate } from "../components";
+import { concatConfig } from "../utils";
 export default defineComponent({
+  components: {
+    ElGenerate,
+  },
   name: "com-searchbar",
   inheritAttrs: false,
   props: {
@@ -23,29 +25,25 @@ export default defineComponent({
         }
      */
     options: { type: [Object, Array], default: () => [] },
-
-    // 参考 el-form-item 组件库的api
-    elFormItem: Object,
   },
-  emits: ["update:modelValue", "validate"],
   setup: (props, { emit, slots, attrs }) => {
-    const generateVNode = generateEl(props, { emit });
-    const OPTIONS = useConcatConfig(props["options"]);
+    const OPTIONS = concatConfig(props["options"]);
     return () =>
       h(
-        <div class="component_search-bar">
+        <div class="components__search-bar">
           {OPTIONS.map((option) => (
             <div
               class={[
-                "component_search-bar_selector",
-                "component_search-bar_selector--" +
-                  ((option.attrs && option.attrs.size) || ""),
+                "components__search-bar__selector",
+                option.attrs && option.attrs.size
+                  ? "components__search-bar__selector--" + option.attrs.size
+                  : "",
               ]}
             >
-              <div class="component_search-bar_selector_label">
+              <div class="components__search-bar__selector__label">
                 {option.formItem ? option.formItem.label : ""}
               </div>
-              {generateVNode(option)}
+              <el-generate vModel={props["modelValue"]} option={option} />
             </div>
           ))}
           {Object.values(slots).map((slot) => slot())}
@@ -56,13 +54,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.component_search-bar {
+@include B(components__search-bar) {
   flex-shrink: 0;
   display: flex;
   padding: 10px;
   flex-wrap: wrap;
   overflow: hidden;
-  @at-root &_selector {
+  @include E(selector) {
     flex: 1;
     width: 100%;
     height: 40px;
@@ -72,16 +70,24 @@ export default defineComponent({
     & + * {
       margin-left: 10px;
     }
-    &--mini {
+    & > {
+      [class^="el-"] {
+        flex: 1;
+        .el-input__inner {
+          border-radius: 0 4px 4px 0;
+        }
+      }
+    }
+    @include M(mini) {
       height: 28px;
     }
-    &--small {
+    @include M(small) {
       height: 32px;
     }
-    &--medium {
+    @include M(medium) {
       height: 40px;
     }
-    @at-root &_label {
+    @include E(label) {
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -95,12 +101,6 @@ export default defineComponent({
       border-radius: 4px 0 0 4px;
       border-right: 0;
       box-sizing: border-box;
-    }
-    & > [class^="el-"] {
-      flex: 1;
-      .el-input__inner {
-        border-radius: 0 4px 4px 0;
-      }
     }
   }
 }

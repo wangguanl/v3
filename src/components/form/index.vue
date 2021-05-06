@@ -1,8 +1,11 @@
 <script>
 import { defineComponent, h, onMounted, ref } from "vue";
-import useConcatConfig from "../hooks/concat-config";
-import generateEl from "../hooks/generate-el";
+import { ElGenerate } from "../components";
+import { concatConfig } from "../utils";
 export default defineComponent({
+  components: {
+    ElGenerate,
+  },
   name: "com-form",
   inheritAttrs: false,
   props: {
@@ -24,12 +27,12 @@ export default defineComponent({
     options: { type: [Object, Array], default: () => [] },
 
     // 参考 el-form-item 组件库的api
-    elFormItem: Object,
+    elFormItem: { type: Object, default: () => ({}) },
   },
-  emits: ["update:modelValue", "formMethods"],
+  emits: ["formMethods"],
   setup: (props, { emit, slots, attrs }) => {
-    const OPTIONS = useConcatConfig(props["options"]);
-    const generateVNode = generateEl(props, { emit, slots, attrs });
+    console.log(props);
+    const OPTIONS = concatConfig(props["options"]);
     // 处理数据类型 根据数据类型返回对应的 dom 结构
     function useComplexType(arrayObject) {
       // 数组
@@ -62,7 +65,7 @@ export default defineComponent({
             {...props["elFormItem"]}
             {...option.formItem}
           >
-            {generateVNode(option)}
+            <el-generate vModel={props["modelValue"]} option={option} />
           </el-form-item>
         );
       }
@@ -106,7 +109,7 @@ export default defineComponent({
     return () =>
       h(
         <el-form
-          class="component_form"
+          class="components__form"
           ref={elFormRef}
           {...attrs}
           model={props["modelValue"]}
@@ -125,7 +128,7 @@ export default defineComponent({
 });
 </script>
 <style lang="scss">
-.component_form {
+@include B(components__form) {
   .el-row {
     width: 100%;
   }
@@ -135,9 +138,6 @@ export default defineComponent({
     .el-select {
       flex: 1;
     }
-    // [class^="el-"] {
-    //   flex: 1;
-    // }
   }
 }
 </style>

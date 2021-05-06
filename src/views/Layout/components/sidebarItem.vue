@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import components from "@/components/index";
 export default {
   name: "SidebarItem",
   props: ["router"],

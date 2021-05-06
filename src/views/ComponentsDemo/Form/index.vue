@@ -7,7 +7,7 @@ import {
   defineAsyncComponent,
 } from "vue";
 import formOptions from "./form";
-import ComForm from "@/components/form";
+import { ComForm } from "@/components";
 
 export default defineComponent({
   components: {
@@ -55,8 +55,8 @@ export default defineComponent({
                     vModel={STATE["FORM"].fileList}
                     limit={3}
                     accept="image/jpeg,image/png"
-                    onUploadMethods={({ onInit, onSuccess }) => {
-                      HANDLES["UPLOAD"] = { onInit, onSuccess };
+                    onUploadMethods={({ onInit, onUploaded }) => {
+                      HANDLES["UPLOAD"] = { onInit, onUploaded };
                     }}
                     vSlots={{
                       tip: () => <>只能上传 jpg/png 格式文件，且不超过 3 张</>,
@@ -69,7 +69,7 @@ export default defineComponent({
                     type="primary"
                     onClick={() => {
                       console.log(STATE["FORM"]);
-                      if (HANDLES["UPLOAD"].onSuccess()) {
+                      if (!HANDLES["UPLOAD"].onUploaded()) {
                         ctx.Message.warning("文件正在上传中");
                         return;
                       }

@@ -3,6 +3,14 @@
 </template>
 
 <style lang="scss">
-@import "./assets/css/reset.css"; // 重置样式
-@import "./assets/css/index.scss"; // 全局样式
+html,
+body,
+#app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+body {
+  font-size: 14px;
+}
 </style>

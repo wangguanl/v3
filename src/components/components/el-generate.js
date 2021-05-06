@@ -1,29 +1,30 @@
-import {
-  resolveComponent,
-  h,
-  computed,
-} from "vue";
+import { resolveComponent, h, computed, defineComponent } from "vue";
 import { useStore } from "vuex";
 import { DICTIONARIES } from "@/store/types";
-import formatDate from '../utils/formatDate'
-export default (props, { emit }) => {
-  const Store = useStore();
-  const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
-  /*
-   * key => 键
-   * val => 值
-   */
-  const onUpdate = (key, val) => {
-    props["modelValue"][key] = val;
-    emit("update:modelValue", props["modelValue"]);
-  };
-  /* 
+import { formatDate } from "../utils";
+export default defineComponent({
+  props: {
+    modelValue: { type: Object, default: () => ({}) },
+    option: {
+      default: () => ({}),
+    },
+  },
+  emits: ["update:modelValue"],
+  setup: (props, { emit }) => {
+    const Store = useStore();
+    const Dictionaries = computed(() => Store.state[DICTIONARIES.state]);
+    /*
+     * key => 键
+     * val => 值
+     */
+    const onUpdate = (key, val) => {
+      props["modelValue"][key] = val;
+      // emit("update:modelValue", props["modelValue"]);
+    };
+    /* 
     清空内容
   */
-  const onClear = (key) => onUpdate(key, "");
-
-  return (() => {
-    // 组件基本配置
+    const onClear = (key) => onUpdate(key, "");
     const config = {
       select: ({ key, selectOptions }) => [
         {
@@ -118,22 +119,29 @@ export default (props, { emit }) => {
         return [
           {
             ...Types[elTypeAttrs["type"] || "date"],
-            onChange: (val) => onUpdate(key, Array.isArray(val) ? val.map(v => formatDate(v)) : formatDate(val))
+            onChange: (val) =>
+              onUpdate(
+                key,
+                Array.isArray(val)
+                  ? val.map((v) => formatDate(v))
+                  : formatDate(val)
+              ),
           },
         ];
       },
     };
-    return (option) => {
-      const {
-        type,
-        key,
-        formItem = {},
-        attrs: elTypeAttrs,
-        slots: elTypeSlots,
-      } = option;
-      const [Attrs, Slots] = config[type](option);
+    const {
+      type,
+      key,
+      formItem = {},
+      attrs: elTypeAttrs,
+      slots: elTypeSlots,
+    } = props["option"];
+    const [Attrs, Slots] = config[type](props["option"]);
 
-      return h(
+    // 组件基本配置
+    return () =>
+      h(
         resolveComponent("el-" + type),
         {
           modelValue: props["modelValue"][key],
@@ -144,6 +152,5 @@ export default (props, { emit }) => {
         },
         { ...Slots, ...elTypeSlots }
       );
-    };
-  })();
-}
+  },
+});

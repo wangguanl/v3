@@ -3,17 +3,13 @@ import App from "@/App.vue";
 import router from "@/router";
 import store from "@/store";
 
-const app = createApp(App);
-
+import "normalize.css";
 /* 组件库 */
 import elementPlus from "@/basics/element-plus";
-import components from "@/components"; // 自定义组件
-app
-  .use(store)
+import components from "@/components/install"; // 自定义组件
+createApp(App)
   .use(router)
+  .use(store)
   .use(elementPlus)
-  .use(components);
-
-router.isReady().then(() => {
-  app.mount("#app");
-});
+  .use(components)
+  .mount("#app");

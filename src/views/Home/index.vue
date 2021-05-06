@@ -15,18 +15,20 @@ import {
   nextTick,
   defineComponent,
 } from "vue";
-import { ComSearchBar, ComTable, ComForm } from "@/components";
+import {
+  ComSearchBar,
+  ComTable,
+  ComForm,
+  ComHandleUploadPic,
+  ComDialog,
+} from "@/components";
 
 export default defineComponent({
   components: {
     ComSearchBar,
     ComTable,
     ComForm,
-    ComHandleUploadPic: defineAsyncComponent(() =>
-      import(
-        /* webpackChunkName: "ComHandleUploadPic" */ "@/components/upload/handle-upload-pic"
-      )
-    ),
+    ComHandleUploadPic,
   },
   async setup() {
     const Store = useStore();
@@ -57,7 +59,20 @@ export default defineComponent({
       },
 
       FORM: {
-        fileList: [],
+        fileList: [
+          {
+            name: "food.jpeg",
+            status: "success",
+            url:
+              "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
+          },
+          {
+            name: "food2.jpeg",
+            status: "success",
+            url:
+              "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
+          },
+        ],
       },
     });
     // 操作事件函数
@@ -107,7 +122,7 @@ export default defineComponent({
 
     return () =>
       h(
-        <div className="wrap">
+        <div class="views__home">
           <ComSearchBar
             options={searchOptions()}
             vModel={STATE["SEARCHBAR"]}
@@ -206,7 +221,7 @@ export default defineComponent({
               METHDOS.FetchPostTableData();
             }}
           />
-          <com-dialog
+          <ComDialog
             {...STATE["DIALOG"].attr}
             onClosed={async () => {
               STATE["FORM"] = {
@@ -243,10 +258,9 @@ export default defineComponent({
                         <el-form-item label="上传">
                           <ComHandleUploadPic
                             vModel={STATE["FORM"].fileList}
-                            limit={3}
                             accept="image/jpeg,image/png"
-                            onUploadMethods={({ onInit, onSuccess }) => {
-                              HANDLES["UPLOAD"] = { onInit, onSuccess };
+                            onUploadMethods={({ onInit, onUploaded }) => {
+                              HANDLES["UPLOAD"] = { onInit, onUploaded };
                             }}
                             vSlots={{
                               tip: () => (
@@ -260,8 +274,9 @@ export default defineComponent({
                             loading={STATE["LOADINGS"].submit}
                             type="primary"
                             onClick={() => {
-                              if (HANDLES["UPLOAD"].onSuccess()) {
-                                ctx.Message.warning("文件正在上传中");
+                              console.log(STATE["FORM"]);
+                              if (!HANDLES["UPLOAD"].onUploaded()) {
+                                ctx.Message.warning("请先将文件上传到服务器");
                                 return;
                               }
                               STATE["LOADINGS"].submit = true;
@@ -300,8 +315,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.wrap {
+<style lang="scss">
+.views__home {
   height: 100%;
   width: 100%;
   display: flex;

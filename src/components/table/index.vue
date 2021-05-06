@@ -1,6 +1,6 @@
 <script>
 import { defineComponent, resolveComponent, h } from "vue";
-import useConcatConfig from "../hooks/concat-config";
+import { concatConfig } from "../utils";
 export default defineComponent({
   name: "com-table",
   inheritAttrs: false,
@@ -30,10 +30,11 @@ export default defineComponent({
   },
   emits: ["selection-change"],
   setup: (props, { emit, slots, attrs }) => {
-    const COLUMNS = useConcatConfig(props["columns"]);
+    const COLUMNS = concatConfig(props["columns"]);
     return () =>
       h(
         <el-table
+          class="components__el-table"
           data={props["datas"]}
           style="width: 100%"
           height="100%"
@@ -87,8 +88,8 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-.el-table {
+<style>
+.components__el-table {
   flex: 1;
   overflow: hidden;
 }

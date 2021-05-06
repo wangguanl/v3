@@ -1,5 +1,5 @@
 <template>
-  <el-container ref="container" class="wrap">
+  <el-container ref="container" class="views__layout">
     <el-aside :width="isCollapse ? '65px' : '200px'">
       <el-scrollbar :native="false">
         <el-menu
@@ -19,8 +19,8 @@
         </el-menu>
       </el-scrollbar>
     </el-aside>
-    <el-container class="container">
-      <el-header class="header">
+    <el-container>
+      <el-header>
         <div class="breadcrumb">
           <i
             :class="[
@@ -70,8 +70,9 @@
           </template>
         </el-dropdown>
       </el-header>
-      <el-main class="main">
+      <el-main>
         <router-view #default="{ Component }">
+          <!-- <component :is="Component" /> -->
           <!-- <transition name="el-fade-in"> -->
           <suspense>
             <template #default>
@@ -113,7 +114,7 @@ export default {
   },
   data() {
     return {
-      isCollapse: true,
+      isCollapse: false,
       levelList: [],
     };
   },
@@ -126,19 +127,19 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.wrap {
+<style lang="scss">
+.views__layout {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  @at-root .el-aside {
+  & > .el-aside {
     background-color: #304156;
     overflow: hidden;
     transition: width 0.3s linear;
     .el-scrollbar {
       height: 100%;
       overflow: hidden;
-      :deep(.el-scrollbar__wrap) {
+      .el-scrollbar__wrap {
         overflow-x: hidden;
       }
     }
@@ -154,11 +155,11 @@ export default {
     }
   }
 
-  @at-root .container {
+  & > .el-container {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    & > .header {
+    & > .el-header {
       width: 100%;
       box-shadow: 0 1px 2px #ebeeef;
       display: flex;
@@ -178,24 +179,15 @@ export default {
         }
       }
     }
-    & > .main {
+    & > .el-main {
       height: 100%;
       width: 100%;
       padding: 0;
       overflow: hidden;
     }
   }
-}
-.pointer {
-  @extend %pointer;
-}
-/* 为对应的路由跳转时设置动画效果 */
-.fade-enter-active,
-.fade-leave-avtive {
-  transition: opacity 1s;
-}
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
+  .pointer {
+    @extend %pointer;
+  }
 }
 </style>

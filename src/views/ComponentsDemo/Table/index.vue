@@ -1,6 +1,6 @@
 <script>
 import { h, defineComponent, reactive } from "vue";
-import ComTable from "@/components/table";
+import { ComTable } from "@/components";
 import columnsOptions from "./columns";
 export default defineComponent({
   components: {

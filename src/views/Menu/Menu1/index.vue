@@ -1,7 +1,7 @@
 <script>
 import { defineComponent, resolveComponent, h, getCurrentInstance } from "vue";
-
 export default defineComponent({
+  components: {},
   setup() {
     const curInstance = getCurrentInstance();
     console.log(curInstance);
@@ -31,6 +31,8 @@ export default defineComponent({
     const Tag = "h" + this.level;
     return (
       <div>
+        <el-button>123123</el-button>
+        <a href="">123123</a>
         {h("input", {
           style: {
             border: "1px solid #ccc",

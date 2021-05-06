@@ -66,7 +66,7 @@ import axios from "axios";
 import { defineComponent, reactive } from "vue";
 import compositionApi from "./hooks/index.vue";
 import { ItemType } from "./types/index";
-import mock from './mock';
+import mock from "./mock";
 mock.bootstrap();
 
 export default defineComponent({
@@ -123,7 +123,7 @@ export default defineComponent({
   },
 });
 </script>
-<style lang='scss' scoped>
+<style lang='scss'>
 .content_page {
   width: 100%;
   height: 100%;

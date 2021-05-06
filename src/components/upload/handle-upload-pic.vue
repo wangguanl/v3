@@ -12,7 +12,6 @@ import {
 } from "vue";
 import Sortable from "sortablejs";
 import axios, { uploadURL, ip, CancelToken } from "@/basics/request";
-import ElImageViewer from "element-plus/es/el-image-viewer/index.js";
 export default {
   name: "com-handle-upload-pic",
   inheritAttrs: false,
@@ -24,7 +23,6 @@ export default {
   },
   emits: ["update:modelValue", "uploadMethods"],
   components: {
-    ElImageViewer,
     Teleport,
   },
   setup: (props, { attrs, slots, emit }) => {
@@ -197,7 +195,7 @@ export default {
     };
     const HANDLES = {
       onChange: (file, fileList) => {
-        emit("update:modelValue", fileList);
+        emit("update:modelValue", [...fileList]);
         METHODS.useBeforeUpload(file);
       },
       onSubmit: () => {
@@ -208,17 +206,16 @@ export default {
       },
       onRemove: (file, fileList) => {
         props["modelValue"].splice(props["modelValue"].indexOf(file), 1);
-        fileList = props["modelValue"];
       },
       onPreview(file) {
+        console.log(props["modelValue"]);
         STATE.Preview = {
           initialIndex: props["modelValue"].indexOf(file),
           visible: true,
           list: props["modelValue"].map(({ url, name }) =>
-            url.startsWith(location.protocol + "//" + location.hostname) ||
-            url.startsWith(
-              "blob:" + location.protocol + "//" + location.hostname
-            )
+            url.startsWith("http:") ||
+            url.startsWith("https:") ||
+            url.startsWith("blob:")
               ? url
               : ip + url
           ),
@@ -231,8 +228,9 @@ export default {
           UploadRefMethods.onAbort();
           uploadRef.value.clearFiles();
         },
-        onSuccess: () =>
-          props["modelValue"].some(({ status }) => status !== "success"),
+        onUploaded: () =>
+          !!props["modelValue"].length &&
+          !props["modelValue"].some(({ status }) => status !== "success"),
         onSubmit: HANDLES.onSubmit,
         onClearFiles: uploadRef.value.clearFiles,
         onAbort: () => {},
@@ -272,6 +270,7 @@ export default {
       h(
         <>
           <el-upload
+            class="components__upload"
             ref={uploadRef}
             {...MergeAttrs}
             v-slots={{
@@ -318,12 +317,7 @@ export default {
                   </el-button>
                 </>
               ),
-              trigger: () =>
-                STATE.imageUrl ? (
-                  <img src={STATE.imageUrl} class="avatar" />
-                ) : (
-                  <i class="el-icon-plus avatar-uploader-icon"></i>
-                ),
+              trigger: () => <i class="el-icon-plus avatar-uploader-icon" />,
             }}
           />
           {STATE.Preview.visible ? (
@@ -343,31 +337,16 @@ export default {
 </script>
 
 <style lang="scss">
-:deep(.el-image) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .el-image__inner {
-    max-width: 100%;
-    max-height: 100%;
-    height: unset;
-    width: unset;
+.components__upload {
+  .el-upload-list {
+    display: inline-block;
+    line-height: 1;
+  }
+  .el-upload--picture-card {
+    margin-bottom: 10px;
   }
 }
-.el-upload-list {
-  display: inline-block;
-  line-height: 1;
-}
-.el-upload--picture-card {
-  margin-bottom: 10px;
-}
-.hidden .el-upload--picture-card {
-  display: none;
-}
-:deep(.el-image-viewer__wrapper) {
+.el-image-viewer__wrapper {
   .el-icon-circle-close {
     color: #fff;
   }
